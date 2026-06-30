@@ -1,0 +1,99 @@
+/* =========================
+   CSS VARIABLES
+========================= */
+
+:root {
+  --primary: #2563eb;
+  --secondary: #3b82f6;
+
+  --bg-dark: #020617;
+  --bg-light: #0f172a;
+
+  --card-dark: #172554;
+  --card-light: #1e293b;
+
+  --text: #f8fafc;
+  --text-secondary: #cbd5e1;
+
+  --success: #4ade80;
+  --warning: #facc15;
+  --danger: #f87171;
+
+  --shadow:
+    0 20px 50px rgba(0,0,0,0.35);
+
+  --transition: 0.35s ease;
+}
+
+/* =========================
+   RESET
+========================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* =========================
+   BODY
+========================= */
+
+body {
+  font-family: "Segoe UI", sans-serif;
+
+  background:
+    linear-gradient(
+      135deg,
+      #020617,
+      #0f172a,
+      #172554
+    );
+
+  color: var(--text);
+
+  overflow-x: hidden;
+
+  min-height: 100vh;
+}
+
+a {
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+}
+
+img {
+  display: block;
+}
+
+/* =========================
+   APP
+========================= */
+
+.app {
+  min-height: 100vh;
+}
+
+/* =========================
+   SCROLLBAR
+========================= */
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2563eb;
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3b82f6;
+}

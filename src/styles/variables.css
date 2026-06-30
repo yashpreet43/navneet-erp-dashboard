@@ -1,0 +1,28 @@
+:root {
+
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-card: #162033;
+
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+
+  --border: rgba(255,255,255,0.08);
+
+  --shadow:
+    0 20px 40px rgba(0,0,0,0.25);
+
+  --glass:
+    rgba(255,255,255,0.04);
+
+  --radius: 24px;
+
+  --transition: 0.3s ease;
+}

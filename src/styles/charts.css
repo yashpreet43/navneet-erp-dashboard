@@ -1,0 +1,28 @@
+.chart-container {
+
+  background:
+    rgba(30,41,59,0.85);
+
+  border:
+    1px solid var(--border);
+
+  border-radius:
+    30px;
+
+  padding: 30px;
+
+  margin-top: 30px;
+
+  box-shadow:
+    var(--shadow);
+
+  animation:
+    chartFade 1s ease;
+}
+
+.chart-container h3 {
+
+  color: white;
+
+  margin-bottom: 20px;
+}

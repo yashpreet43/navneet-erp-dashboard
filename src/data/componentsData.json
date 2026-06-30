@@ -1,0 +1,198 @@
+[
+  {
+    "id": "1",
+    "name": "SAFETY CAP FOR FLANGE OD DIFF CASE 857",
+    "plant": "plant 3",
+    "price": "14.8",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "2",
+    "name": "PLASTIC CAP ITL DIA 193.36 MM",
+    "plant": "plant 3",
+    "price": "7.75",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "3",
+    "name": "PLASTIC CAP ITL DIA 190.32 MM",
+    "plant": "plant 3",
+    "price": "7.6",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "4",
+    "name": "PLASTIC CAP FOR PROP SHAFT 156 M95X2",
+    "plant": "plant 3",
+    "price": "5.95",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "5",
+    "name": "PLASTIC CAP ITL DIA 190.32 MM",
+    "plant": "plant 3",
+    "price": "7.6",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "6",
+    "name": "PLASTIC CAP ITL DIA 193.36 MM",
+    "plant": "plant 3",
+    "price": "7.75",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "7",
+    "name": "PLASTIC CAP FOR PROP SHAFT 156 M95X2",
+    "plant": "plant 3",
+    "price": "5.95",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "8",
+    "name": "PLASTIC COVER M12",
+    "plant": "plant 7",
+    "price": "2.35",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "9",
+    "name": "SAFETY CAP FOR FLANGE OD DIFF CASE 857",
+    "plant": "plant 3",
+    "price": "14.8",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "10",
+    "name": "PLASTIC CAP ITL DIA 190.32 MM",
+    "plant": "plant 2",
+    "price": "7.6",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "11",
+    "name": "PLASTIC COVER M24",
+    "plant": "plant 7",
+    "price": "2.75",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "12",
+    "name": "PLASTIC COVER M12",
+    "plant": "plant 7",
+    "price": "2.35",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "13",
+    "name": "PLASTIC COVER DIA 100MM X 88MM L",
+    "plant": "plant 7",
+    "price": "7.35",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "14",
+    "name": "SAFETY CAP FOR FLANGE OD DIFF CASE 857",
+    "plant": "plant 3",
+    "price": "14.8",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "15",
+    "name": "SAFETY CAP FOR FLANGE OD DIFF CASE 857",
+    "plant": "plant 3",
+    "price": "14.8",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "16",
+    "name": "SAFETY CAP FOR BEARING OD DIFF CASE 857",
+    "plant": "plant 3",
+    "price": "4.7",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "17",
+    "name": "PLASTIC CAP FOR PROP SHAFT 156 M95X2",
+    "plant": "plant 3",
+    "price": "5.95",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "18",
+    "name": "PLASTIC CAP FOR PROP SHAFT 156 M60X2",
+    "plant": "plant 3",
+    "price": "5.75",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "19",
+    "name": "PLASTIC CAP FOR DRIVE SHAFT M52X1.5",
+    "plant": "plant 3",
+    "price": "2.8",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "20",
+    "name": "PLASTIC COVER M24",
+    "plant": "plant 7",
+    "price": "2.75",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "21",
+    "name": "PLASTIC COVER M12",
+    "plant": "plant 7",
+    "price": "2.35",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "22",
+    "name": "PLASTIC COVER DIA 100MM X 88MM L",
+    "plant": "plant 7",
+    "price": "7.35",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "23",
+    "name": "PLASTIC CAP DIA 85",
+    "plant": "plant 7",
+    "price": "6.8",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "24",
+    "name": "PLASTIC COVER M24",
+    "plant": "plant 7",
+    "price": "2.75",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "25",
+    "name": "PLASTIC CAP ITL DIA 193.36 MM",
+    "plant": "plant 2",
+    "price": "7.75",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "26",
+    "name": "PLASTIC CAP ITL DIA 190.32 MM",
+    "plant": "plant 2",
+    "price": "7.6",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "27",
+    "name": "PLASTIC CAP ITL DIA 141 MM",
+    "plant": "plant 2",
+    "price": "5.5",
+    "image": "/images/default-component.jpg"
+  },
+  {
+    "id": "28",
+    "name": "PLASTIC CAP ITL DIA 186.97 MM",
+    "plant": "plant 2",
+    "price": "7.5",
+    "image": "/images/default-component.jpg"
+  }
+]

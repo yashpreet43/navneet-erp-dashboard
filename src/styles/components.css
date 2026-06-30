@@ -1,0 +1,324 @@
+/* =========================
+   MAIN LAYOUT
+========================= */
+
+.plastic-main-content {
+  max-width: 1550px;
+
+  margin: auto;
+
+  display: flex;
+
+  gap: 25px;
+
+  align-items: flex-start;
+
+  padding: 20px 30px 70px;
+}
+
+/* =========================
+   COMPONENT GRID
+========================= */
+
+.component-list {
+  flex: 1;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fill, minmax(320px, 1fr));
+
+  gap: 30px;
+}
+
+/* =========================
+   COMPONENT CARD
+========================= */
+
+.component-card {
+  background:
+    linear-gradient(
+      145deg,
+      #172554,
+      #1e293b
+    );
+
+  border-radius: 28px;
+
+  overflow: hidden;
+
+  cursor: pointer;
+
+  border:
+    1px solid rgba(255,255,255,0.08);
+
+  box-shadow:
+    0 20px 45px rgba(0,0,0,0.35);
+
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease,
+    border 0.35s ease;
+}
+
+.component-card:hover {
+  transform:
+    translateY(-10px);
+
+  border:
+    1px solid rgba(96,165,250,0.3);
+
+  box-shadow:
+    0 30px 60px rgba(0,0,0,0.45),
+    0 0 25px rgba(59,130,246,0.2);
+}
+
+/* =========================
+   COMPONENT IMAGE
+========================= */
+
+.component-image {
+  width: 100%;
+
+  height: 240px;
+
+  object-fit: contain;
+
+  background: #0f172a;
+
+  padding: 15px;
+
+  transition:
+    transform 0.4s ease;
+}
+
+.component-card:hover .component-image {
+  transform: scale(1.05);
+}
+
+/* =========================
+   CARD CONTENT
+========================= */
+
+.component-card-content {
+  padding: 25px;
+}
+
+.component-card-content h3 {
+  color: white;
+
+  font-size: 20px;
+
+  line-height: 1.4;
+
+  margin-bottom: 18px;
+
+  min-height: 65px;
+}
+
+.component-card-content p {
+  color: #cbd5e1;
+
+  font-size: 15px;
+
+  margin-bottom: 10px;
+}
+
+.component-card-content strong {
+  color: white;
+}
+
+/* =========================
+   DETAIL PANEL
+========================= */
+
+.detail-panel {
+  flex: 0.8;
+
+  max-width: 430px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #172554,
+      #1e293b
+    );
+
+  border-radius: 28px;
+
+  padding: 25px;
+
+  position: sticky;
+
+  top: 95px;
+
+  border:
+    1px solid rgba(255,255,255,0.08);
+
+  box-shadow:
+    0 20px 45px rgba(0,0,0,0.35);
+
+  max-height: 82vh;
+
+  overflow-y: auto;
+}
+
+/* =========================
+   DETAIL IMAGE
+========================= */
+
+.detail-image {
+  width: 100%;
+
+  height: 220px;
+
+  object-fit: contain;
+
+  background: #0f172a;
+
+  border-radius: 20px;
+
+  padding: 15px;
+
+  margin-bottom: 20px;
+
+  transition: 0.3s ease;
+}
+
+.detail-image:hover {
+  transform: scale(1.03);
+}
+
+/* =========================
+   DETAIL CONTENT
+========================= */
+
+.detail-panel h2 {
+  font-size: 24px;
+
+  line-height: 1.4;
+
+  margin-bottom: 20px;
+
+  color: white;
+}
+
+.detail-panel p {
+  color: #dbeafe;
+
+  font-size: 15px;
+
+  margin-bottom: 12px;
+
+  padding-bottom: 10px;
+
+  border-bottom:
+    1px solid rgba(255,255,255,0.05);
+}
+
+.detail-panel strong {
+  color: white;
+}
+
+/* =========================
+   PROFIT COLORS
+========================= */
+
+.profit-positive {
+  color: #4ade80;
+}
+
+.profit-medium {
+  color: #facc15;
+}
+
+.profit-low {
+  color: #f87171;
+}
+
+/* =========================
+   EMPTY STATE
+========================= */
+
+.detail-panel h2:first-child {
+  text-align: center;
+
+  color: #cbd5e1;
+
+  margin-top: 100px;
+}
+
+/* =========================
+   SCROLLBAR
+========================= */
+
+.detail-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.detail-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.detail-panel::-webkit-scrollbar-thumb {
+  background: #3b82f6;
+
+  border-radius: 20px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 1200px) {
+
+  .plastic-main-content {
+    flex-direction: column;
+  }
+
+  .detail-panel {
+    max-width: 100%;
+
+    width: 100%;
+
+    position: relative;
+
+    top: 0;
+
+    max-height: none;
+  }
+}
+
+@media (max-width: 900px) {
+
+  .component-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .plastic-main-content {
+    padding: 15px;
+  }
+
+  .component-image {
+    height: 220px;
+  }
+
+  .detail-image {
+    height: 220px;
+  }
+
+  .detail-panel {
+    padding: 20px;
+  }
+
+  .detail-panel h2 {
+    font-size: 22px;
+  }
+
+  .component-card-content h3 {
+    font-size: 18px;
+  }
+}

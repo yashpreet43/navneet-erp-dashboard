@@ -1,0 +1,364 @@
+/* =========================
+   FILTER SECTION
+========================= */
+
+.plastic-page-filters {
+  max-width: 1550px;
+
+  margin: 30px auto;
+
+  padding: 0 30px;
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  gap: 25px;
+
+  flex-wrap: wrap;
+}
+
+/* =========================
+   SEARCH BOX
+========================= */
+
+.search-box {
+  flex: 1;
+
+  min-width: 320px;
+}
+
+.search-box input {
+  width: 100%;
+
+  padding: 18px 24px;
+
+  border: none;
+
+  border-radius: 18px;
+
+  background:
+    rgba(30,41,59,0.9);
+
+  color: white;
+
+  font-size: 16px;
+
+  outline: none;
+
+  border:
+    1px solid rgba(255,255,255,0.08);
+
+  box-shadow:
+    0 10px 25px rgba(0,0,0,0.2);
+
+  transition: 0.3s ease;
+}
+
+.search-box input::placeholder {
+  color: #94a3b8;
+}
+
+.search-box input:focus {
+  border:
+    1px solid #3b82f6;
+
+  box-shadow:
+    0 0 0 4px rgba(59,130,246,0.2),
+    0 15px 30px rgba(0,0,0,0.25);
+
+  transform: translateY(-2px);
+}
+
+/* =========================
+   PLANT FILTER
+========================= */
+
+.plant-filter {
+  min-width: 240px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #172554,
+      #1e293b
+    );
+
+  padding: 20px;
+
+  border-radius: 22px;
+
+  border:
+    1px solid rgba(255,255,255,0.08);
+
+  box-shadow:
+    0 15px 35px rgba(0,0,0,0.3);
+}
+
+.plant-filter h3 {
+  color: white;
+
+  font-size: 16px;
+
+  margin-bottom: 12px;
+}
+
+.plant-filter select {
+  width: 100%;
+
+  padding: 14px 18px;
+
+  border: none;
+
+  border-radius: 14px;
+
+  background:
+    #0f172a;
+
+  color: white;
+
+  font-size: 15px;
+
+  cursor: pointer;
+
+  outline: none;
+
+  border:
+    1px solid rgba(255,255,255,0.08);
+
+  transition: 0.3s ease;
+}
+
+.plant-filter select:focus {
+  border:
+    1px solid #3b82f6;
+
+  box-shadow:
+    0 0 0 4px rgba(59,130,246,0.15);
+}
+
+.plant-filter option {
+  background: #0f172a;
+
+  color: white;
+}
+
+/* =========================
+   GENERAL FORM
+========================= */
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: #cbd5e1;
+
+  font-size: 15px;
+
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+
+  padding: 14px 18px;
+
+  border-radius: 14px;
+
+  border:
+    1px solid rgba(255,255,255,0.08);
+
+  background:
+    rgba(30,41,59,0.95);
+
+  color: white;
+
+  font-size: 15px;
+
+  outline: none;
+
+  transition: 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border:
+    1px solid #3b82f6;
+
+  box-shadow:
+    0 0 0 4px rgba(59,130,246,0.15);
+}
+
+/* =========================
+   SUBMIT BUTTON
+========================= */
+
+.submit-order-btn,
+.primary-btn {
+  padding: 14px 28px;
+
+  border: none;
+
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb,
+      #3b82f6
+    );
+
+  color: white;
+
+  font-size: 16px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.3s ease;
+
+  box-shadow:
+    0 12px 25px rgba(37,99,235,0.35);
+}
+
+.submit-order-btn:hover,
+.primary-btn:hover {
+  transform:
+    translateY(-3px);
+
+  box-shadow:
+    0 18px 35px rgba(37,99,235,0.45);
+}
+
+/* =========================
+   DANGER BUTTON
+========================= */
+
+.delete-btn {
+  background:
+    linear-gradient(
+      135deg,
+      #dc2626,
+      #ef4444
+    );
+}
+
+.delete-btn:hover {
+  box-shadow:
+    0 15px 30px rgba(239,68,68,0.35);
+}
+
+/* =========================
+   SUCCESS BUTTON
+========================= */
+
+.success-btn {
+  background:
+    linear-gradient(
+      135deg,
+      #16a34a,
+      #22c55e
+    );
+}
+
+.success-btn:hover {
+  box-shadow:
+    0 15px 30px rgba(34,197,94,0.35);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 768px) {
+
+  .plastic-page-filters {
+    padding: 0 15px;
+
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .plant-filter {
+    width: 100%;
+  }
+}
+input,
+select {
+
+  background:
+    rgba(255,255,255,0.05);
+
+  border:
+    1px solid var(--border);
+
+  color: white;
+
+  padding: 14px 20px;
+
+  border-radius: 15px;
+
+  width: 100%;
+}
+
+input:focus,
+select:focus {
+
+  outline: none;
+
+  border:
+    1px solid var(--primary);
+
+  box-shadow:
+    0 0 20px rgba(59,130,246,.3);
+}
+
+button {
+
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb,
+      #3b82f6
+    );
+
+  border: none;
+
+  color: white;
+
+  padding: 14px 24px;
+
+  border-radius: 15px;
+
+  cursor: pointer;
+
+  transition:
+    var(--transition);
+
+  font-weight: 600;
+}
+
+button:hover {
+
+  transform:
+    translateY(-3px);
+
+  box-shadow:
+    0 15px 30px rgba(37,99,235,.3);
+}
