@@ -38,6 +38,10 @@ function Sidebar() {
     Employees
 </NavLink>
 
+<NavLink to="/vendors">
+    Vendors
+</NavLink>
+
       </div>
 
     </div>

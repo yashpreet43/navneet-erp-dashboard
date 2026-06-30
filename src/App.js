@@ -43,6 +43,9 @@ import AddExpense from "./pages/AddExpense";
 
 import Employees from "./pages/Employees";
 
+import Vendors from "./pages/Vendors";
+
+
 function App() {
 
   return (
@@ -90,6 +93,11 @@ function App() {
 <Route
     path="/employees"
     element={<Employees />}
+/>
+
+<Route
+    path="/vendors"
+    element={<Vendors />}
 />
 
 <Route
