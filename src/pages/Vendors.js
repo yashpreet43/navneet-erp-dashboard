@@ -66,58 +66,44 @@ function Vendors() {
                         Vendors 
                     </h2>
 
-                    <table className="machine-table">
-
-                        <thead>
-
-                            <tr>
-                                <th>Vendor</th>
-                                <th>Quantity</th>
-                                <th>Rate</th>
-                                <th>Frequency</th>
-                                <th>Material</th>
-                                <th>Status</th>
-                            </tr>
-
-                        </thead>
-
-                        <tbody>
-
-                            {vendors.map((vendor) => (
-
-                                <tr key={vendor.id}>
-
-                                    <td>
-                                        {vendor.vendor_name}
-                                    </td>
-
-                                    <td>
-                                        {vendor.quantity} Ton
-                                    </td>
-
-                                    <td>
-                                        ₹{vendor.rate}/kg
-                                    </td>
-
-                                    <td>
-                                        {vendor.frequency}
-                                    </td>
-
-                                    <td>
-                                        {vendor.material}
-                                    </td>
-
-                                    <td>
-                                        {vendor.status}
-                                    </td>
-
+                    <div className="table-container">
+                        <table className="machine-table">
+                            <thead>
+                                <tr>
+                                    <th>Vendor</th>
+                                    <th>Quantity</th>
+                                    <th>Rate</th>
+                                    <th>Frequency</th>
+                                    <th>Material</th>
+                                    <th>Status</th>
                                 </tr>
-
-                            ))}
-
-                        </tbody>
-
-                    </table>
+                            </thead>
+                            <tbody>
+                                {vendors.map((vendor) => (
+                                    <tr key={vendor.id}>
+                                        <td>
+                                            {vendor.vendor_name}
+                                        </td>
+                                        <td>
+                                            {vendor.quantity} Ton
+                                        </td>
+                                        <td>
+                                            ₹{vendor.rate}/kg
+                                        </td>
+                                        <td>
+                                            {vendor.frequency}
+                                        </td>
+                                        <td>
+                                            {vendor.material}
+                                        </td>
+                                        <td>
+                                            {vendor.status}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
 
                 </div>
 

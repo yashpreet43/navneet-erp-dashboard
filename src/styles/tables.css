@@ -89,6 +89,8 @@ tbody td {
   color: #dbeafe;
 
   font-size: 15px;
+  
+  white-space: nowrap;
 }
 
 /* =========================

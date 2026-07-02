@@ -87,65 +87,48 @@ function Expenses() {
 
                 </div>
 
-                <table className="history-table">
-
-                    <thead>
-
-                        <tr>
-                            <th>Date</th>
-                            <th>Category</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        {expenses.map((item) => (
-
-                            <tr key={item.id}>
-
-                                <td>
-                                    {item.expense_date}
-                                </td>
-
-                                <td>
-                                    {item.category}
-                                </td>
-
-                                <td>
-                                    ₹{item.amount}
-                                </td>
-
-                                <td>
-                                    {item.status}
-                                </td>
-
-                                <td>
-
-                                    {item.status === "Pending" && (
-
-                                        <button
-                                            onClick={() =>
-                                                markPaid(item.id)
-                                            }
-                                        >
-                                            Mark Paid
-                                        </button>
-
-                                    )}
-
-                                </td>
-
+                <div className="table-container">
+                    <table className="history-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Action</th>
                             </tr>
-
-                        ))}
-
-                    </tbody>
-
-                </table>
+                        </thead>
+                        <tbody>
+                            {expenses.map((item) => (
+                                <tr key={item.id}>
+                                    <td>
+                                        {item.expense_date}
+                                    </td>
+                                    <td>
+                                        {item.category}
+                                    </td>
+                                    <td>
+                                        ₹{item.amount}
+                                    </td>
+                                    <td>
+                                        {item.status}
+                                    </td>
+                                    <td>
+                                        {item.status === "Pending" && (
+                                            <button
+                                                onClick={() =>
+                                                    markPaid(item.id)
+                                                }
+                                            >
+                                                Mark Paid
+                                            </button>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
 
             </div>
 

@@ -123,7 +123,7 @@ function PendingOrders() {
           {filteredOrders.length}
         </p>
 
-        <div className="pending-table-wrapper">
+        <div className="table-container">
 
           <table className="pending-modern-table">
 

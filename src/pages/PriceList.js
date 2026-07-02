@@ -100,7 +100,7 @@ function PriceList() {
 
       {/* TABLE */}
 
-      <div className="price-table-container">
+      <div className="table-container">
 
         <table className="price-table">
 

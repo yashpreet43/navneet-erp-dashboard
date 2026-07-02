@@ -396,7 +396,7 @@ const workforceData = [
             </BarChart>
         </ResponsiveContainer>
 
-        <div className="machine-table">
+        <div className="table-container">
 
             <table>
 
@@ -472,29 +472,32 @@ const workforceData = [
     </div>
 
 </div>
-<ResponsiveContainer width="100%" height={300}>
-    <PieChart>
+<section className="dashboard-card">
+    <h2>Expense Distribution</h2>
+    <ResponsiveContainer width="100%" height={300}>
+        <PieChart>
 
-        <Pie
-            data={expenseData}
-            dataKey="value"
-            outerRadius={100}
-            label
-        >
+            <Pie
+                data={expenseData}
+                dataKey="value"
+                outerRadius={100}
+                label
+            >
 
-            <Cell fill="#3b82f6" />
-            <Cell fill="#10b981" />
-            <Cell fill="#f59e0b" />
-            <Cell fill="#ef4444" />
-            <Cell fill="#8b5cf6" />
+                <Cell fill="#3b82f6" />
+                <Cell fill="#10b981" />
+                <Cell fill="#f59e0b" />
+                <Cell fill="#ef4444" />
+                <Cell fill="#8b5cf6" />
 
-        </Pie>
+            </Pie>
 
-        <Tooltip />
-        <Legend />
+            <Tooltip />
+            <Legend />
 
-    </PieChart>
-</ResponsiveContainer>
+        </PieChart>
+    </ResponsiveContainer>
+</section>
 
 <div className="insight warning">
     Raw material contributes 41% of total expenses.

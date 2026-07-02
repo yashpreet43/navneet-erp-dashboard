@@ -19,24 +19,10 @@ import AddOrder
 from "./pages/AddOrder";
 
 import "./styles/global.css";
-
-import "./styles/navbar.css";
-
-//import "./styles/main.css";
-
-import "./styles/animations.css";
-
-import "./styles/components.css";
-
-import "./styles/forms.css";
-
-import "./styles/tables.css";
-
-import "./styles/pages.css";
-import "./styles/animations.css";
-import "./styles/responsive.css";
-
 import "./styles/sidebar.css";
+import "./styles/home.css";
+import "./styles/forms.css";
+import "./styles/tables.css";
 
 import Expenses from "./pages/Expenses";
 import AddExpense from "./pages/AddExpense";

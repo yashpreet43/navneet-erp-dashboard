@@ -348,7 +348,8 @@ function OrderHistory() {
             Purchase Orders
           </h2>
 
-          <table className="history-table">
+          <div className="table-container">
+            <table className="history-table">
 
             <thead>
 
@@ -438,6 +439,7 @@ function OrderHistory() {
             </tbody>
 
           </table>
+          </div>
 
         </div>
 
@@ -447,7 +449,8 @@ function OrderHistory() {
             Dispatch History
           </h2>
 
-          <table className="history-table">
+          <div className="table-container">
+            <table className="history-table">
 
             <thead>
 
@@ -488,6 +491,7 @@ function OrderHistory() {
             </tbody>
 
           </table>
+          </div>
 
         </div>
 

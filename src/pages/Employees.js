@@ -58,7 +58,7 @@ function Employees() {
                     Employee Management
                 </h1>
 
-                <div className="dashboard-card">
+                <div className="table-container">
 
                     <table className="machine-table">
 

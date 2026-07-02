@@ -132,7 +132,7 @@ function Orders() {
           Orders & Billing
         </h1>
 
-        <div className="orders-table">
+        <div className="table-container">
 
           <table>
 
