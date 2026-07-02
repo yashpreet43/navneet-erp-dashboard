@@ -4,6 +4,9 @@ import ComponentList from "../components/ComponentList";
 import ComponentDetail from "../components/ComponentDetail";
 import Navbar from "../components/Navbar";
 
+import "../styles/components.css";
+import "../styles/pages.css";
+
 import { supabase } from "../supabaseClient";
 
 function PlasticComponents() {
@@ -29,27 +32,15 @@ function PlasticComponents() {
     loadData();
   }, []);
 
-  async function loadData() {
+async function loadData() {
 
-    const { data, error } =
-      await supabase
-        .from("component_catalog")
-        .select("*");
+    const { data: componentData } =
+        await supabase
+            .from("component_catalog")
+            .select("*");
 
-    if (error) {
-      console.log(error);
-      return;
-    }
-
-    setComponents(data || []);
-
-    const { data: poData } =
-      await supabase
-        
-        .select("*");
-
-   
-  }
+    setComponents(componentData || []);
+}
 
 
   const filteredItems =

@@ -24,7 +24,7 @@ function Employees() {
             return;
         }
 
-        setEmployees(data);
+        setEmployees(data || []);
     }
 
     async function paySalary(id) {

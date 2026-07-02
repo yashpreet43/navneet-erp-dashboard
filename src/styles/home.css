@@ -9,16 +9,15 @@
 }
 
 .layout {
-    display: grid;
-    grid-template-columns: 250px 1fr;
+    display: flex;
     min-height: 100vh;
 }
 
 .main-content {
-    padding: 30px 40px;
-    box-sizing: border-box;
+    flex: 1;
+    margin-left: 250px;
+    padding: 30px;
     overflow-x: hidden;
-    min-width: 0;
 }
 
 /* HEADER */
@@ -121,6 +120,12 @@
 
 .recharts-wrapper {
     width: 100% !important;
+    height: 100% !important;
+}
+
+.recharts-surface {
+    width: 100% !important;
+    height: 100% !important;
 }
 
 .chart-card {
@@ -269,7 +274,8 @@
         font-size: 34px;
     }
 }
-.dashboard-card {
+.left-column .dashboard-card,
+.right-column .dashboard-card {
     height: 100%;
 }
 
@@ -280,14 +286,33 @@
     gap: 25px;
 }
 .dashboard-card {
-    transition: 0.3s;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: cardFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .dashboard-card:hover {
-    transform: translateY(-6px);
-    box-shadow:
-        0 30px 60px rgba(0,0,0,0.4);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    border-color: rgba(96, 165, 250, 0.2);
 }
+
+@keyframes cardFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.main-content > .dashboard-card { animation-delay: 0.1s; }
+.dashboard-columns:nth-of-type(1) .left-column .dashboard-card { animation-delay: 0.2s; }
+.dashboard-columns:nth-of-type(1) .right-column .dashboard-card { animation-delay: 0.3s; }
+.main-content > .stats-grid { animation-delay: 0.4s; }
 
 .dashboard-card h2 {
     font-size: 32px;
@@ -298,6 +323,8 @@
 .recharts-wrapper {
     margin: auto;
 }
+
+
 .operations-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;

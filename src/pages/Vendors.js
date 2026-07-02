@@ -20,7 +20,7 @@ function Vendors() {
                 .select("*");
 
         if (!error) {
-            setVendors(data);
+            setVendors(data || []);
         }
     }
 
