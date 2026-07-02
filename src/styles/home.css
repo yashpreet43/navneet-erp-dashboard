@@ -99,11 +99,13 @@
     grid-template-columns: 1fr 1fr;
     gap: 30px;
     margin-bottom: 30px;
+    min-width: 0;
 }
 
 .left-column,
 .right-column {
     width: 100%;
+    min-width: 0;
 }
 
 /* PRODUCTIVITY STATS */
@@ -118,18 +120,20 @@
 
 /* CHARTS */
 
-.recharts-wrapper {
-    width: 100% !important;
-    height: 100% !important;
-}
-
-.recharts-surface {
-    width: 100% !important;
-    height: 100% !important;
-}
-
 .chart-card {
     width: 100%;
+    height: 320px;
+    min-height: 320px;
+}
+
+.chart-card .recharts-wrapper {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.chart-card .recharts-surface {
+    width: 100% !important;
+    height: 100% !important;
 }
 
 .machine-table {

@@ -30,8 +30,14 @@ function Home() {
     setPurchaseOrders] =
     useState([]);
 
+  const [isMounted, setIsMounted] = useState(false);
+
   useEffect(() => {
     loadData();
+
+    requestAnimationFrame(() => {
+        setIsMounted(true);
+    });
   }, []);
 
   async function loadData() {
@@ -366,26 +372,30 @@ console.log("Components:", components.length);
 
                     </div>
 
-                  <ResponsiveContainer width="100%" height={320}>
-                        <PieChart>
-                            <Pie
-                                data={shiftData}
-                                dataKey="value"
-                                outerRadius={100}
-                                label
-                                isAnimationActive={true}
-                                animationDuration={1200}
-                            >
-                                <Cell fill="#3b82f6" />
-                                <Cell fill="#f59e0b" />
-                                <Cell fill="#10b981" />
-                            </Pie>
+                  <div className="chart-card">
+                      {isMounted && (
+                          <ResponsiveContainer width="100%" height={320}>
+                                <PieChart>
+                                    <Pie
+                                        data={shiftData}
+                                        dataKey="value"
+                                        outerRadius={100}
+                                        label
+                                        isAnimationActive={true}
+                                        animationDuration={1200}
+                                    >
+                                        <Cell fill="#3b82f6" />
+                                        <Cell fill="#f59e0b" />
+                                        <Cell fill="#10b981" />
+                                    </Pie>
 
-                            <Tooltip />
-                            <Legend />
+                                    <Tooltip />
+                                    <Legend />
 
-                        </PieChart>
-                    </ResponsiveContainer>
+                                </PieChart>
+                            </ResponsiveContainer>
+                      )}
+                    </div>
 
                 </section>
 
@@ -397,26 +407,29 @@ console.log("Components:", components.length);
 
                     <h2>Machine Capacity</h2>
 
-                    <ResponsiveContainer width="100%" height={320}>
+              <div className="chart-card">
 
-                        <BarChart data={machineCapacity}>
+    <BarChart
+        width={700}
+        height={320}
+        data={machineCapacity}
+    >
+        <CartesianGrid strokeDasharray="3 3" />
 
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="machine" />
-                            <YAxis />
-                            <Tooltip />
+        <XAxis dataKey="machine" />
 
-                            <Bar
-                                dataKey="capacity"
-                                fill="#3b82f6"
-                                radius={[8,8,0,0]}
-                                isAnimationActive={true}
-                                animationDuration={1200}
-                            />
+        <YAxis />
 
-                        </BarChart>
+        <Tooltip />
 
-                    </ResponsiveContainer>
+        <Bar
+            dataKey="capacity"
+            fill="#3b82f6"
+        />
+
+    </BarChart>
+
+</div>
 
                 </section>
 
@@ -434,33 +447,37 @@ console.log("Components:", components.length);
 
                     <h2>Expense Analysis</h2>
 
-                    <ResponsiveContainer width="100%" height={320}>
+                    <div className="chart-card">
+                        {isMounted && (
+                            <ResponsiveContainer width="100%" height={320}>
 
-                        <PieChart>
+                                <PieChart>
 
-                            <Pie
-                                data={expenseData}
-                                dataKey="value"
-                                outerRadius={100}
-                                label
-                                isAnimationActive={true}
-                                animationDuration={1200}
-                            >
+                                    <Pie
+                                        data={expenseData}
+                                        dataKey="value"
+                                        outerRadius={100}
+                                        label
+                                        isAnimationActive={true}
+                                        animationDuration={1200}
+                                    >
 
-                                <Cell fill="#3b82f6" />
-                                <Cell fill="#10b981" />
-                                <Cell fill="#f59e0b" />
-                                <Cell fill="#ef4444" />
-                                <Cell fill="#8b5cf6" />
+                                        <Cell fill="#3b82f6" />
+                                        <Cell fill="#10b981" />
+                                        <Cell fill="#f59e0b" />
+                                        <Cell fill="#ef4444" />
+                                        <Cell fill="#8b5cf6" />
 
-                            </Pie>
+                                    </Pie>
 
-                            <Tooltip />
-                            <Legend />
+                                    <Tooltip />
+                                    <Legend />
 
-                        </PieChart>
+                                </PieChart>
 
-                    </ResponsiveContainer>
+                            </ResponsiveContainer>
+                        )}
+                    </div>
 
                 </section>
 
@@ -609,32 +626,36 @@ console.log("Components:", components.length);
 
                     <h2>Workforce Distribution</h2>
 
-                    <ResponsiveContainer width="100%" height={320}>
+                    <div className="chart-card">
+                        {isMounted && (
+                            <ResponsiveContainer width="100%" height={320}>
 
-                        <PieChart>
+                                <PieChart>
 
-                            <Pie
-                                data={workforceData}
-                                dataKey="value"
-                                outerRadius={100}
-                                label
-                                isAnimationActive={true}
-                                animationDuration={1200}
-                            >
+                                    <Pie
+                                        data={workforceData}
+                                        dataKey="value"
+                                        outerRadius={100}
+                                        label
+                                        isAnimationActive={true}
+                                        animationDuration={1200}
+                                    >
 
-                                <Cell fill="#3b82f6" />
-                                <Cell fill="#10b981" />
-                                <Cell fill="#f59e0b" />
-                                <Cell fill="#ef4444" />
+                                        <Cell fill="#3b82f6" />
+                                        <Cell fill="#10b981" />
+                                        <Cell fill="#f59e0b" />
+                                        <Cell fill="#ef4444" />
 
-                            </Pie>
+                                    </Pie>
 
-                            <Tooltip />
-                            <Legend />
+                                    <Tooltip />
+                                    <Legend />
 
-                        </PieChart>
+                                </PieChart>
 
-                    </ResponsiveContainer>
+                            </ResponsiveContainer>
+                        )}
+                    </div>
 
                 </section>
 
@@ -652,25 +673,29 @@ console.log("Components:", components.length);
 
                     <h2>Top Components</h2>
 
-                    <ResponsiveContainer width="100%" height={320}>
+                    <div className="chart-card">
+                        {isMounted && (
+                            <ResponsiveContainer width="100%" height={320}>
 
-                        <BarChart data={profitData} layout="vertical">
+                                <BarChart data={profitData} layout="vertical">
 
-                            <XAxis type="number" />
-                            <YAxis type="category" dataKey="name" />
-                            <Tooltip />
+                                    <XAxis type="number" />
+                                    <YAxis type="category" dataKey="name" />
+                                    <Tooltip />
 
-                            <Bar
-                                dataKey="profit"
-                                fill="#3b82f6"
-                                radius={[0,8,8,0]}
-                                isAnimationActive={true}
-                                animationDuration={1200}
-                            />
+                                    <Bar
+                                        dataKey="profit"
+                                        fill="#3b82f6"
+                                        radius={[0,8,8,0]}
+                                        isAnimationActive={true}
+                                        animationDuration={1200}
+                                    />
 
-                        </BarChart>
+                                </BarChart>
 
-                    </ResponsiveContainer>
+                            </ResponsiveContainer>
+                        )}
+                    </div>
 
                 </section>
 
@@ -682,25 +707,29 @@ console.log("Components:", components.length);
 
                     <h2>Plant Profit</h2>
 
-                    <ResponsiveContainer width="100%" height={320}>
+                    <div className="chart-card">
+                        {isMounted && (
+                            <ResponsiveContainer width="100%" height={320}>
 
-                        <BarChart data={plantProfitData}>
+                                <BarChart data={plantProfitData}>
 
-                            <XAxis dataKey="plant" />
-                            <YAxis />
-                            <Tooltip />
+                                    <XAxis dataKey="plant" />
+                                    <YAxis />
+                                    <Tooltip />
 
-                            <Bar
-                                dataKey="profit"
-                                fill="#10b981"
-                                radius={[8,8,0,0]}
-                                isAnimationActive={true}
-                                animationDuration={1200}
-                            />
+                                    <Bar
+                                        dataKey="profit"
+                                        fill="#10b981"
+                                        radius={[8,8,0,0]}
+                                        isAnimationActive={true}
+                                        animationDuration={1200}
+                                    />
 
-                        </BarChart>
+                                </BarChart>
 
-                    </ResponsiveContainer>
+                            </ResponsiveContainer>
+                        )}
+                    </div>
 
                 </section>
 
