@@ -627,3 +627,299 @@ img {
     transform: translateX(0);
   }
 }
+
+/* ==========================================================================
+   GLASSMORPHISM GLOBAL STYLES (ADDED FOR MODERN PREMIUM THEME)
+   ========================================================================== */
+
+/* 1. Global Background, Typography and Scrollbars */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+body {
+  font-family: 'Inter', sans-serif !important;
+  background: linear-gradient(135deg, #0b1020 0%, #111827 100%) !important;
+  color: #f3f4f6 !important;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Background floating gradient blobs */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(120px);
+  opacity: 0.15;
+  animation: floatBlobsGlobal 25s infinite alternate ease-in-out;
+}
+
+body::before {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, #3b82f6 0%, transparent 70%);
+  top: 15%;
+  left: -100px;
+}
+
+body::after {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+  bottom: 15%;
+  right: -150px;
+  animation-delay: -7s;
+}
+
+/* Third green blob */
+.layout::before {
+  content: "";
+  position: fixed;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, #10b981 0%, transparent 70%);
+  top: 50%;
+  left: 35%;
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(100px);
+  opacity: 0.12;
+  animation: floatBlobsGlobal 30s infinite alternate-reverse ease-in-out;
+  animation-delay: -12s;
+}
+
+@keyframes floatBlobsGlobal {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(100px, -60px) scale(1.18); }
+  100% { transform: translate(-60px, 100px) scale(0.85); }
+}
+
+/* Global Headings & Typography */
+h1, h2, h3, h4, h5, h6 {
+  color: #f3f4f6 !important;
+}
+
+p, span.secondary, .muted, .text-secondary {
+  color: #9ca3af !important;
+}
+
+/* 2. Glassmorphism Card Override */
+.dashboard-card,
+.stat-card,
+.operation-card,
+.component-card,
+.detail-panel,
+.plant-filter,
+.section-card,
+.table-container,
+.form-container,
+.add-expense-card,
+.add-employee-card,
+.add-vendor-card {
+  background: rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25) !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.dashboard-card:hover,
+.stat-card:hover,
+.operation-card:hover,
+.component-card:hover,
+.detail-panel:hover,
+.plant-filter:hover,
+.section-card:hover,
+.table-container:hover,
+.form-container:hover,
+.add-expense-card:hover,
+.add-employee-card:hover,
+.add-vendor-card:hover {
+  transform: translateY(-4px) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* 3. Inputs, Dropdowns & Forms Glassmorphism */
+input[type="text"],
+input[type="number"],
+input[type="password"],
+input[type="email"],
+input[type="date"],
+select,
+textarea,
+.search-box input {
+  background: rgba(15, 23, 42, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  padding: 12px 18px !important;
+  color: #e2e8f0 !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  transition: all 0.3s ease !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+input[type="date"]:focus,
+select:focus,
+textarea:focus,
+.search-box input:focus {
+  border-color: #60a5fa !important;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.3) !important;
+  background: rgba(15, 23, 42, 0.95) !important;
+}
+
+select:hover {
+  border-color: #60a5fa !important;
+}
+
+select option,
+select optgroup {
+  background-color: #0f172a !important;
+  color: #e2e8f0 !important;
+}
+
+/* 4. Tables glassmorphism */
+table {
+  background: transparent !important;
+}
+
+thead {
+  background: rgba(255, 255, 255, 0.04) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+thead th {
+  color: #f3f4f6 !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: transparent !important;
+}
+
+tbody tr {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  transition: background 0.2s ease !important;
+}
+
+tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+tbody td {
+  color: #cbd5e1 !important;
+}
+
+/* 5. Sidebar Glassmorphism */
+.sidebar {
+  background: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15) !important;
+}
+
+.sidebar a:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #f3f4f6 !important;
+}
+
+.sidebar a.active {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25) !important;
+}
+
+/* 6. Buttons Styling */
+button,
+.dashboard-btn,
+.btn,
+.btn-primary,
+.submit-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 12px !important;
+  padding: 12px 24px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25) !important;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+button:hover,
+.dashboard-btn:hover,
+.btn:hover,
+.btn-primary:hover,
+.submit-btn:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.45), 0 0 15px rgba(59, 130, 246, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+/* Thin Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.01) !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-radius: 10px !important;
+  transition: background 0.3s ease !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* 7. Specific Glass-Card wrapper classes for Recharts containers */
+.glass-card {
+  background: rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35) !important;
+  padding: 24px !important;
+  min-height: 420px !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  transition: all 0.3s ease !important;
+}
+
+.glass-card:hover {
+  transform: translateY(-4px) !important;
+  border-color: rgba(99, 102, 241, 0.5) !important;
+  box-shadow: 0 12px 40px rgba(99, 102, 241, 0.15) !important,
+              0 8px 32px rgba(0, 0, 0, 0.25) !important;
+}
+
+.chart-wrapper {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 300px !important;
+  flex: 1 !important;
+  position: relative !important;
+}

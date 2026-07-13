@@ -32,15 +32,17 @@ function PendingOrders() {
       return;
     }
 
+    console.log("Fetched Pending Orders query results:", data);
     setOrders(data || []);
   };
 
   const filteredOrders =
     orders.filter((item) => {
-
+      const itemPlantNum = String(item.plant || "").replace(/\D/g, "");
+      const selectedPlantNum = selectedPlant.replace(/\D/g, "");
       const plantMatch =
         selectedPlant === "All" ||
-        String(item.plant) === selectedPlant;
+        itemPlantNum === selectedPlantNum;
 
       const searchMatch =
         (item.component || "")
@@ -150,7 +152,7 @@ function PendingOrders() {
                   </td>
 
                   <td>
-                    Plant {item.plant}
+                    Plant {String(item.plant || "").replace(/plant/i, "").trim()}
                   </td>
 
                   <td className="pending-value">

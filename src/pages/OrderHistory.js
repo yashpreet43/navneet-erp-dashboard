@@ -59,9 +59,7 @@ function OrderHistory() {
       data: poItems,
       error: poError
     } = await supabase
-      .from(
-        "purchase_order_items"
-      )
+      .from("purchase_order_items")
       .select(`
         id,
         ordered_qty,
@@ -73,14 +71,27 @@ function OrderHistory() {
           plant
         )
       `)
-      .eq(
-        "component_id",
-        componentId
-      );
+      .eq("component_id", componentId);
 
     if (poError) {
       console.log(poError);
       return;
+    }
+
+    let poDocs = [];
+    const poIds = poItems.map((item) => item.purchase_order_id).filter(Boolean);
+    if (poIds.length > 0) {
+      try {
+        const { data: docs, error: docsError } = await supabase
+          .from("po_documents")
+          .select("*")
+          .in("purchase_order_id", poIds);
+        if (!docsError) {
+          poDocs = docs || [];
+        }
+      } catch (err) {
+        console.warn("po_documents fetch bypassed:", err);
+      }
     }
 
     const itemIds =
@@ -172,35 +183,20 @@ function OrderHistory() {
             "In Progress";
         }
 
+        const doc = poDocs.find((d) => d.purchase_order_id === item.purchase_order_id);
+
         return {
-
-          po_number:
-            item.purchase_orders
-              .po_number,
-
-          po_date:
-            item.purchase_orders
-              .po_date,
-
-          plant:
-            item.purchase_orders
-              .plant,
-
-          ordered_qty:
-            item.ordered_qty,
-
-          dispatched_qty:
-            deliveredQty,
-
-          pending_qty:
-            pendingQty,
-
+          purchase_order_id: item.purchase_order_id,
+          po_number: item.purchase_orders.po_number,
+          po_date: item.purchase_orders.po_date,
+          plant: item.purchase_orders.plant,
+          ordered_qty: item.ordered_qty,
+          dispatched_qty: deliveredQty,
+          pending_qty: pendingQty,
           completion,
-
           status,
-
-          purchase_order_item_id:
-            item.id
+          po_document_url: doc ? doc.file_url : null,
+          purchase_order_item_id: item.id
         };
       });
 
@@ -362,6 +358,7 @@ function OrderHistory() {
                 <th>Plant</th>
                 <th>Completion</th>
                 <th>Status</th>
+                <th>Action</th>
               </tr>
 
             </thead>
@@ -430,6 +427,29 @@ function OrderHistory() {
 
                     </span>
 
+                  </td>
+
+                  <td>
+                    {order.po_document_url ? (
+                      <a
+                        href={order.po_document_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="dashboard-btn"
+                        style={{
+                          padding: "6px 12px",
+                          fontSize: "12px",
+                          textDecoration: "none",
+                          background: "rgba(255, 255, 255, 0.08) !important",
+                          margin: 0,
+                          display: "inline-block"
+                        }}
+                      >
+                        📎 View PO
+                      </a>
+                    ) : (
+                      <span style={{ fontSize: "12px", color: "#6b7280" }}>Manual</span>
+                    )}
                   </td>
 
                 </tr>

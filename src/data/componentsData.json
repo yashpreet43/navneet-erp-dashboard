@@ -1,198 +1,578 @@
 [
   {
-    "id": "1",
-    "name": "SAFETY CAP FOR FLANGE OD DIFF CASE 857",
-    "plant": "plant 3",
-    "price": "14.8",
-    "image": "/images/default-component.jpg"
-  },
-  {
-    "id": "2",
-    "name": "PLASTIC CAP ITL DIA 193.36 MM",
-    "plant": "plant 3",
-    "price": "7.75",
-    "image": "/images/default-component.jpg"
-  },
-  {
-    "id": "3",
-    "name": "PLASTIC CAP ITL DIA 190.32 MM",
-    "plant": "plant 3",
-    "price": "7.6",
-    "image": "/images/default-component.jpg"
-  },
-  {
-    "id": "4",
-    "name": "PLASTIC CAP FOR PROP SHAFT 156 M95X2",
-    "plant": "plant 3",
-    "price": "5.95",
-    "image": "/images/default-component.jpg"
-  },
-  {
-    "id": "5",
-    "name": "PLASTIC CAP ITL DIA 190.32 MM",
-    "plant": "plant 3",
-    "price": "7.6",
-    "image": "/images/default-component.jpg"
-  },
-  {
-    "id": "6",
-    "name": "PLASTIC CAP ITL DIA 193.36 MM",
-    "plant": "plant 3",
-    "price": "7.75",
-    "image": "/images/default-component.jpg"
-  },
-  {
-    "id": "7",
-    "name": "PLASTIC CAP FOR PROP SHAFT 156 M95X2",
-    "plant": "plant 3",
-    "price": "5.95",
-    "image": "/images/default-component.jpg"
-  },
-  {
-    "id": "8",
-    "name": "PLASTIC COVER M12",
-    "plant": "plant 7",
-    "price": "2.35",
-    "image": "/images/default-component.jpg"
-  },
-  {
-    "id": "9",
-    "name": "SAFETY CAP FOR FLANGE OD DIFF CASE 857",
-    "plant": "plant 3",
-    "price": "14.8",
-    "image": "/images/default-component.jpg"
-  },
-  {
-    "id": "10",
-    "name": "PLASTIC CAP ITL DIA 190.32 MM",
+    "id": 1,
+    "name": "SPINDLE CAP 146",
+    "weight": 33.0,
+    "price": 5.0,
     "plant": "plant 2",
-    "price": "7.6",
-    "image": "/images/default-component.jpg"
+    "company": "RKFL",
+    "image": "/images/components/img1.jpeg"
   },
   {
-    "id": "11",
-    "name": "PLASTIC COVER M24",
+    "id": 2,
+    "name": "PLASTIC CAP DIA 193.6 MM",
+    "weight": 46.0,
+    "price": 7.75,
+    "plant": "plant 2",
+    "company": "RKFL",
+    "image": "/images/components/img2.jpeg"
+  },
+  {
+    "id": 3,
+    "name": "PLASTIC CAP ITL DIA163.25 MM",
+    "weight": 40.0,
+    "price": 5.3,
+    "plant": "plant 2",
+    "company": "RKFL",
+    "image": "/images/components/img3.jpeg"
+  },
+  {
+    "id": 4,
+    "name": "PLASTIC CAP DIA 164.5 MM",
+    "weight": 40.0,
+    "price": 6.85,
+    "plant": "plant 2",
+    "company": "RKFL",
+    "image": "/images/components/img4.jpeg"
+  },
+  {
+    "id": 5,
+    "name": "PLASTIC CAP ITL DIA 190 MM",
+    "weight": 36.0,
+    "price": 7.6,
+    "plant": "plant 2",
+    "company": "RKFL",
+    "image": "/images/components/img5.jpeg"
+  },
+  {
+    "id": 6,
+    "name": "PLASTIC CAP DIA 63.5 MM",
+    "weight": 16.0,
+    "price": "",
     "plant": "plant 7",
-    "price": "2.75",
-    "image": "/images/default-component.jpg"
+    "company": "RKFL",
+    "image": "/images/components/img6.jpeg"
   },
   {
-    "id": "12",
-    "name": "PLASTIC COVER M12",
+    "id": 7,
+    "name": "PLASTIC CAP 73.5 MM DIA",
+    "weight": 16.0,
+    "price": 9.3,
     "plant": "plant 7",
-    "price": "2.35",
-    "image": "/images/default-component.jpg"
+    "company": "RKFL",
+    "image": "/images/components/img7.jpeg"
   },
   {
-    "id": "13",
-    "name": "PLASTIC COVER DIA 100MM X 88MM L",
-    "plant": "plant 7",
-    "price": "7.35",
-    "image": "/images/default-component.jpg"
+    "id": 8,
+    "name": "RH NECK COVER",
+    "weight": 13.0,
+    "price": "",
+    "plant": "",
+    "company": "RSB",
+    "image": "/images/components/img8.jpeg"
   },
   {
-    "id": "14",
-    "name": "SAFETY CAP FOR FLANGE OD DIFF CASE 857",
-    "plant": "plant 3",
-    "price": "14.8",
-    "image": "/images/default-component.jpg"
+    "id": 9,
+    "name": "PLASTIC CAP DIA 62 MM",
+    "weight": 13.0,
+    "price": "",
+    "plant": "plant 1",
+    "company": "RKFL",
+    "image": "/images/components/img9.jpeg"
   },
   {
-    "id": "15",
-    "name": "SAFETY CAP FOR FLANGE OD DIFF CASE 857",
-    "plant": "plant 3",
-    "price": "14.8",
-    "image": "/images/default-component.jpg"
+    "id": 10,
+    "name": "PLASTIC CAP DIA 102 MM",
+    "weight": 29.0,
+    "price": "",
+    "plant": "plant 1",
+    "company": "RKFL",
+    "image": "/images/components/img10.jpeg"
   },
   {
-    "id": "16",
-    "name": "SAFETY CAP FOR BEARING OD DIFF CASE 857",
-    "plant": "plant 3",
-    "price": "4.7",
-    "image": "/images/default-component.jpg"
+    "id": 11,
+    "name": "PLASTIC CAP DIA46 X HT37 MM",
+    "weight": 14.0,
+    "price": "",
+    "plant": "",
+    "company": "CROSS",
+    "image": "/images/components/img11.jpeg"
   },
   {
-    "id": "17",
-    "name": "PLASTIC CAP FOR PROP SHAFT 156 M95X2",
-    "plant": "plant 3",
-    "price": "5.95",
-    "image": "/images/default-component.jpg"
+    "id": 12,
+    "name": "THREAD PROTECTING CAP  M40 MM",
+    "weight": 8.0,
+    "price": 3.5,
+    "plant": "",
+    "company": "CROSS",
+    "image": "/images/components/img12.jpeg"
   },
   {
-    "id": "18",
-    "name": "PLASTIC CAP FOR PROP SHAFT 156 M60X2",
-    "plant": "plant 3",
-    "price": "5.75",
-    "image": "/images/default-component.jpg"
+    "id": 13,
+    "name": "THREAD PROTECTING CAP M32",
+    "weight": 5.0,
+    "price": 3.33,
+    "plant": "",
+    "company": "AMIT",
+    "image": "/images/components/img13.jpeg"
   },
   {
-    "id": "19",
-    "name": "PLASTIC CAP FOR DRIVE SHAFT M52X1.5",
-    "plant": "plant 3",
-    "price": "2.8",
-    "image": "/images/default-component.jpg"
+    "id": 14,
+    "name": "PLASTIC CAP DIA46 X HT37 MM",
+    "weight": 16.0,
+    "price": "",
+    "plant": "",
+    "company": "JAGAT",
+    "image": "/images/components/img14.jpeg"
   },
   {
-    "id": "20",
-    "name": "PLASTIC COVER M24",
-    "plant": "plant 7",
-    "price": "2.75",
-    "image": "/images/default-component.jpg"
+    "id": 15,
+    "name": "PLASTIC CAP DIA 139 MM",
+    "weight": 31.0,
+    "price": "",
+    "plant": "",
+    "company": "JAGAT",
+    "image": "/images/components/img15.jpeg"
   },
   {
-    "id": "21",
-    "name": "PLASTIC COVER M12",
-    "plant": "plant 7",
-    "price": "2.35",
-    "image": "/images/default-component.jpg"
-  },
-  {
-    "id": "22",
-    "name": "PLASTIC COVER DIA 100MM X 88MM L",
-    "plant": "plant 7",
-    "price": "7.35",
-    "image": "/images/default-component.jpg"
-  },
-  {
-    "id": "23",
+    "id": 16,
     "name": "PLASTIC CAP DIA 85",
-    "plant": "plant 7",
-    "price": "6.8",
-    "image": "/images/default-component.jpg"
+    "weight": 15.0,
+    "price": 6.8,
+    "plant": "",
+    "company": "JAGAT",
+    "image": "/images/components/img16.jpeg"
   },
   {
-    "id": "24",
-    "name": "PLASTIC COVER M24",
-    "plant": "plant 7",
-    "price": "2.75",
-    "image": "/images/default-component.jpg"
+    "id": 17,
+    "name": "PLASTIC CAP DIA 133 MM",
+    "weight": 33.0,
+    "price": "",
+    "plant": "",
+    "company": "JAGAT",
+    "image": "/images/components/img17.jpej"
   },
   {
-    "id": "25",
-    "name": "PLASTIC CAP ITL DIA 193.36 MM",
-    "plant": "plant 2",
-    "price": "7.75",
-    "image": "/images/default-component.jpg"
-  },
-  {
-    "id": "26",
-    "name": "PLASTIC CAP ITL DIA 190.32 MM",
-    "plant": "plant 2",
-    "price": "7.6",
-    "image": "/images/default-component.jpg"
-  },
-  {
-    "id": "27",
+    "id": 18,
     "name": "PLASTIC CAP ITL DIA 141 MM",
-    "plant": "plant 2",
-    "price": "5.5",
-    "image": "/images/default-component.jpg"
+    "weight": 24.0,
+    "price": 5.5,
+    "plant": "",
+    "company": "JAGAT",
+    "image": "/images/components/img18.jpeg"
   },
   {
-    "id": "28",
-    "name": "PLASTIC CAP ITL DIA 186.97 MM",
+    "id": 19,
+    "name": "PLASTIC CAP DIA 180 MM",
+    "weight": 35.0,
+    "price": "",
+    "plant": "",
+    "company": "JAGAT",
+    "image": "/images/components/img19.jpeg"
+  },
+  {
+    "id": 20,
+    "name": "PLASTIC CAP ITL DIA 141 MM",
+    "weight": 24.0,
+    "price": 5.5,
+    "plant": "",
+    "company": "AMIT",
+    "image": "/images/components/img20.jpeg"
+  },
+  {
+    "id": 21,
+    "name": "PLASTIC CAP DIA 85",
+    "weight": 15.0,
+    "price": 6.8,
+    "plant": "",
+    "company": "AMIT",
+    "image": "/images/components/img21.jpeg"
+  },
+  {
+    "id": 22,
+    "name": "PLASTIC CAP DIA 139 MM",
+    "weight": 31.0,
+    "price": "",
+    "plant": "",
+    "company": "AMIT",
+    "image": "/images/components/img22.jpeg"
+  },
+  {
+    "id": 23,
+    "name": "PLASTIC CAP DIA 82.5 MM",
+    "weight": 20.0,
+    "price": "",
+    "plant": "",
+    "company": "AMIT",
+    "image": "/images/components/img23.jpeg"
+  },
+  {
+    "id": 24,
+    "name": "PLASTIC Cover Spring POT ICF/J&T/SK 1823",
+    "weight": 169.0,
+    "price": 24.6,
+    "plant": "plant 7",
+    "company": "RKFL",
+    "image": "/images/components/img24.jpeg"
+  },
+  {
+    "id": 25,
+    "name": "PLASTIC CAP DIA 185 MM",
+    "weight": "",
+    "price": 9.3,
+    "plant": "plant 7",
+    "company": "RKFL",
+    "image": "/images/components/img25.jpeg"
+  },
+  {
+    "id": 26,
+    "name": "PLASTIC CAP DIA 214 MM",
+    "weight": "",
+    "price": "",
+    "plant": "plant 7",
+    "company": "RKFL",
+    "image": "/images/components/img26.jpeg"
+  },
+  {
+    "id": 27,
+    "name": "PLASTIC CAP RASHAFT FLANGE 155.5 MM",
+    "weight": 32.0,
+    "price": 4.9,
+    "plant": "plant 7",
+    "company": "RKFL",
+    "image": "/images/components/img27.jpeg"
+  },
+  {
+    "id": 28,
+    "name": "PLASTIC CAP RASHAFT FLANGE 174.5 MM",
+    "weight": 34.0,
+    "price": 5.9,
+    "plant": "plant 7",
+    "company": "RKFL",
+    "image": "/images/components/img28.jpej"
+  },
+  {
+    "id": 29,
+    "name": "PLASTIC CAP DIA 115 MM",
+    "weight": 24.0,
+    "price": 3.5,
+    "plant": "plant 7",
+    "company": "RKFL",
+    "image": "/images/components/img29.jpeg"
+  },
+  {
+    "id": 30,
+    "name": "PLASTIC CAP DIA 85 MM",
+    "weight": 6.2,
+    "price": 6.8,
+    "plant": "plant 7",
+    "company": "RKFL",
+    "image": "/images/components/img30.jpeg"
+  },
+  {
+    "id": 31,
+    "name": "PLASTIC COVER DIA 100MM*88MM",
+    "weight": 79.0,
+    "price": 7.35,
+    "plant": "plant 7",
+    "company": "RKFL",
+    "image": "/images/components/img31.jpeg"
+  },
+  {
+    "id": 32,
+    "name": "PLASTIC CAP DIA 22 MM",
+    "weight": 9.0,
+    "price": "",
+    "plant": "plant 5",
+    "company": "RKFL",
+    "image": "/images/components/img32.jpeg"
+  },
+  {
+    "id": 33,
+    "name": "M44",
+    "weight": 24.0,
+    "price": "",
+    "plant": "plant 5",
+    "company": "RKFL",
+    "image": "/images/components/img33.jpeg"
+  },
+  {
+    "id": 34,
+    "name": "THREAD PROTECTING CAP  M24 MM",
+    "weight": 6.0,
+    "price": 3.95,
+    "plant": "plant 5",
+    "company": "RKFL",
+    "image": "/images/components/img34.jpeg"
+  },
+  {
+    "id": 35,
+    "name": "F-199",
+    "weight": 13.0,
+    "price": "",
+    "plant": "plant 5",
+    "company": "RKFL",
+    "image": "/images/components/img35.jpeg"
+  },
+  {
+    "id": 36,
+    "name": "FRONT AXLE BEAM (FA90) CAP",
+    "weight": 10.0,
+    "price": 4.0,
+    "plant": "plant 5",
+    "company": "RKFL",
+    "image": "/images/components/img36.jpe"
+  },
+  {
+    "id": 37,
+    "name": "F.A.90[S]",
+    "weight": "",
+    "price": "",
+    "plant": "plant 5",
+    "company": "RKFL",
+    "image": "/images/components/img37.jpeg"
+  },
+  {
+    "id": 38,
+    "name": "THREAD PROTECTING CAP  M70*2 MM",
+    "weight": 16.0,
+    "price": 5.65,
+    "plant": "plant 5",
+    "company": "RKFL",
+    "image": "/images/components/img38.jpeg"
+  },
+  {
+    "id": 39,
+    "name": "THREAD PROTECTING CAP M42",
+    "weight": 20.0,
+    "price": 3.8,
+    "plant": "plant 5",
+    "company": "RKFL",
+    "image": "/images/components/img39.jpeg"
+  },
+  {
+    "id": 40,
+    "name": "THREAD PROTECTING CAP M48",
+    "weight": 17.0,
+    "price": 3.95,
+    "plant": "plant 5",
+    "company": "RKFL",
+    "image": "/images/components/img40.jpeg"
+  },
+  {
+    "id": 41,
+    "name": "THREAD PROTECTING CAP  M32 MM",
+    "weight": 17.0,
+    "price": 3.33,
+    "plant": "plant 5",
+    "company": "RKFL",
+    "image": "/images/components/img41.jpeg"
+  },
+  {
+    "id": 42,
+    "name": "THREAD PROTECTING CAP  M40 MM",
+    "weight": 17.0,
+    "price": 3.5,
+    "plant": "plant 5",
+    "company": "RKFL",
+    "image": "/images/components/img42.jpeg"
+  },
+  {
+    "id": 43,
+    "name": "THREAD PROTECTING CAP M50",
+    "weight": 33.0,
+    "price": 3.5,
+    "plant": "plant 5",
+    "company": "RKFL",
+    "image": "/images/components/img43.jpeg"
+  },
+  {
+    "id": 44,
+    "name": "PLASTIC CAP DIA 115 MM",
+    "weight": 23.0,
+    "price": 3.5,
+    "plant": "plant 3",
+    "company": "RKFL",
+    "image": "/images/components/img44.jpeg"
+  },
+  {
+    "id": 45,
+    "name": "PLASTIC CAP THREAD DIA 80MM",
+    "weight": 19.0,
+    "price": 5.7,
+    "plant": "plant 3",
+    "company": "RKFL",
+    "image": "/images/components/img45.jpeg"
+  },
+  {
+    "id": 46,
+    "name": "PLASTIC CAP (THREAD 3 1/4\")FOR EGE SPINDL",
+    "weight": 30.0,
+    "price": 6.8,
+    "plant": "plant 3",
+    "company": "RKFL",
+    "image": "/images/components/img46.jpeg"
+  },
+  {
+    "id": 47,
+    "name": "PLASTIC CAP DIA 120 MM",
+    "weight": 28.0,
+    "price": 3.3,
+    "plant": "plant 3",
+    "company": "RKFL",
+    "image": "/images/components/img47.jpeg"
+  },
+  {
+    "id": 48,
+    "name": "PLASTIC CAP FOR PROP SHAFT 156 M95X2",
+    "weight": 39.0,
+    "price": 5.95,
+    "plant": "plant 3",
+    "company": "RKFL",
+    "image": "/images/components/img48.jpeg"
+  },
+  {
+    "id": 49,
+    "name": "Safety Cap For Bearing Od Diff Case-857",
+    "weight": 32.0,
+    "price": 4.7,
+    "plant": "plant 3",
+    "company": "RKFL",
+    "image": "/images/components/img49.jpeg"
+  },
+  {
+    "id": 50,
+    "name": "PLASTIC CAP SPLINE RASHAFT (ID 60.3)",
+    "weight": 57.0,
+    "price": 4.8,
+    "plant": "plant 3",
+    "company": "RKFL",
+    "image": "/images/components/img50.jpeg"
+  },
+  {
+    "id": 51,
+    "name": "PLASTIC CAP RA SHAFT ID (75.2) HT(70)",
+    "weight": 32.0,
+    "price": 3.8,
+    "plant": "plant 3",
+    "company": "RKFL",
+    "image": "/images/components/img51.jpeg"
+  },
+  {
+    "id": 52,
+    "name": "PLASTIC CAP(THREAD86)",
+    "weight": 15.0,
+    "price": 3.3,
+    "plant": "plant 3",
+    "company": "RKFL",
+    "image": "/images/components/img52.jpeg"
+  },
+  {
+    "id": 53,
+    "name": "PLASTIC CAP DIA 141 MM",
+    "weight": 24.0,
+    "price": 5.3,
     "plant": "plant 2",
-    "price": "7.5",
-    "image": "/images/default-component.jpg"
+    "company": "RKFL",
+    "image": "/images/components/img53.jpeg"
+  },
+  {
+    "id": 54,
+    "name": "PLASTIC CAP(THREAD M100)",
+    "weight": 36.0,
+    "price": 3.6,
+    "plant": "plant 3",
+    "company": "RKFL",
+    "image": "/images/components/img54.jpeg"
+  },
+  {
+    "id": 55,
+    "name": "M100 SLOT",
+    "weight": 43.0,
+    "price": "",
+    "plant": "plant 3",
+    "company": "RKFL",
+    "image": "/images/components/img55.jpeg"
+  },
+  {
+    "id": 56,
+    "name": "",
+    "weight": "",
+    "price": "",
+    "plant": "",
+    "company": "",
+    "image": "/images/components/component_56.jpg"
+  },
+  {
+    "id": 57,
+    "name": "PLASTIC CAP FLANGE RASHAFT 196 MM",
+    "weight": 73.0,
+    "price": 6.6,
+    "plant": "plant 7",
+    "company": "RKFL",
+    "image": "/images/components/img57.jpeg"
+  },
+  {
+    "id": 58,
+    "name": "PLASTIC SEPARATOR DISC TY OD150 ID50 TH2",
+    "weight": 25.0,
+    "price": 3.8,
+    "plant": "plant 3",
+    "company": "RKFL",
+    "image": "/images/components/img58.jpeg"
+  },
+  {
+    "id": 59,
+    "name": "200 CD",
+    "weight": 46.0,
+    "price": 5.8,
+    "plant": "plant 3",
+    "company": "RKFL",
+    "image": "/images/components/img59.jpeg"
+  },
+  {
+    "id": 60,
+    "name": "PLASTIC CAP FLANGE RASHAFT 189.5 MM",
+    "weight": 66.0,
+    "price": 10.6,
+    "plant": "plant 3",
+    "company": "RKFL",
+    "image": "/images/components/img60.jpeg"
+  },
+  {
+    "id": 61,
+    "name": "PLASTIC CAP FLANGE RASHAFT 243 MM",
+    "weight": 78.0,
+    "price": 10.6,
+    "plant": "plant 3",
+    "company": "RKFL",
+    "image": "/images/components/img61.jpeg"
+  },
+  {
+    "id": 62,
+    "name": "PLASTIC CAP FLANGE RASHAFT 255 MM",
+    "weight": 134.0,
+    "price": 12.3,
+    "plant": "plant 3",
+    "company": "RKFL",
+    "image": "/images/components/img62.jpeg"
+  },
+  {
+    "id": 63,
+    "name": "857 FlangeCap",
+    "weight": 121.0,
+    "price": 14.8,
+    "plant": "plant 3",
+    "company": "RKFL",
+    "image": "/images/components/img63.jpeg"
+  },
+  {
+    "id": 64,
+    "name": "PLASTIC CAP DIA 70",
+    "weight": 63.0,
+    "price": 10.55,
+    "plant": "plant 3",
+    "company": "RKFL",
+    "image": "/images/components/img64.jpeg"
   }
 ]

@@ -13,14 +13,26 @@ function ComponentDetail({ component }) {
         src={`/images/components/${component.image_name}`}
         alt={component.component_name}
         className="detail-image"
-        onError={(e) => {
-          e.target.src =
-            "/images/default-component.jpg";
-        }}
       />
 
       <h2>
         {component.component_name}
+        {component.status === "Auto Created" && (
+          <span className="badge-ai-discovered" style={{
+            background: "linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%)",
+            color: "#ffffff",
+            fontSize: "11px",
+            padding: "4px 8px",
+            borderRadius: "8px",
+            marginLeft: "10px",
+            display: "inline-block",
+            verticalAlign: "middle",
+            fontWeight: "bold",
+            boxShadow: "0 2px 8px rgba(124, 58, 237, 0.4)"
+          }}>
+            AI Discovered
+          </span>
+        )}
       </h2>
 
       <p>
