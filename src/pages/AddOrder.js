@@ -2,7 +2,11 @@ import { useState, useEffect } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import Tesseract from "tesseract.js";
 
-import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
+import PageHeader from "../components/common/PageHeader";
+import FadeContent from "../components/animations/FadeContent";
+import GlassCard from "../components/common/GlassCard";
+import { FormInput, FormSelect, FormDatePicker, FormButton } from "../components/common/FormComponents";
 import companyData from "../data/companyData";
 import { supabase } from "../supabaseClient";
 
@@ -565,229 +569,234 @@ function AddOrder() {
   };
 
   return (
-    <div>
-      <Navbar />
+    <div className="layout">
+      <Sidebar />
 
-      <div className="add-order-page">
-        <h1>Add Purchase Order</h1>
+      <div className="main-content">
+        <FadeContent blur={true} duration={800} initialOpacity={0}>
+          <PageHeader
+            title="Add Purchase Order"
+            subtitle="Enter new purchase orders received from customers."
+          />
 
-        <p className="add-order-subtitle">
-          Enter new purchase orders received from customers.
-        </p>
-
-        <form className="order-form" onSubmit={handleSubmit}>
-          {/* Upload PO Component */}
-          <div className="form-group" style={{ gridColumn: "span 2", marginBottom: "20px", borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "20px" }}>
-            <label style={{ display: "block", fontSize: "14px", color: "#cbd5e1", marginBottom: "10px" }}>
-              Upload PO File (PDF or Image)
-            </label>
-            <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
-              <input
-                type="file"
-                accept=".pdf,image/*"
-                id="po-upload"
-                style={{ display: "none" }}
-                onChange={handleFileChange}
-                disabled={isUploading}
-              />
-              <label
-                htmlFor="po-upload"
-                className="dashboard-btn"
-                style={{
-                  cursor: "pointer",
-                  display: "inline-block",
-                  margin: 0,
-                  textAlign: "center"
-                }}
-              >
-                {isUploading ? "Extracting..." : "Upload PO"}
+          <GlassCard style={{ maxWidth: "800px", margin: "0 auto" }}>
+            {/* Upload PO Component */}
+            <div style={{ marginBottom: "25px", borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "20px" }}>
+              <label style={{ display: "block", fontSize: "14px", color: "#cbd5e1", marginBottom: "10px", fontWeight: 600 }}>
+                Upload PO File (PDF or Image)
               </label>
-              {uploadedDocName && (
-                <span style={{ fontSize: "14px", color: "#4ade80" }}>
-                  📎 {uploadedDocName}
-                </span>
+              <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
+                <input
+                  type="file"
+                  accept=".pdf,image/*"
+                  id="po-upload"
+                  style={{ display: "none" }}
+                  onChange={handleFileChange}
+                  disabled={isUploading}
+                />
+                <label
+                  htmlFor="po-upload"
+                  className="dashboard-btn"
+                  style={{
+                    cursor: "pointer",
+                    display: "inline-block",
+                    margin: 0,
+                    textAlign: "center"
+                  }}
+                >
+                  {isUploading ? "Extracting..." : "Upload PO"}
+                </label>
+                {uploadedDocName && (
+                  <span style={{ fontSize: "14px", color: "#4ade80" }}>
+                    📎 {uploadedDocName}
+                  </span>
+                )}
+              </div>
+              {isUploading && (
+                <div style={{ marginTop: "10px", fontSize: "13px", color: "#60a5fa" }}>
+                  ⏳ {uploadStatus}
+                </div>
+              )}
+              {errorMessage && (
+                <div style={{ marginTop: "10px", fontSize: "13px", color: "#f87171" }}>
+                  ❌ {errorMessage}
+                </div>
               )}
             </div>
-            {isUploading && (
-              <div style={{ marginTop: "10px", fontSize: "13px", color: "#60a5fa" }}>
-                ⏳ {uploadStatus}
-              </div>
-            )}
-            {errorMessage && (
-              <div style={{ marginTop: "10px", fontSize: "13px", color: "#f87171" }}>
-                ❌ {errorMessage}
-              </div>
-            )}
-          </div>
 
-          <div className="form-group">
-            <label>
-              PO Number
-              {formData.poNumber && confidence.poNumber > 0 && (
-                <span style={{ fontSize: "11px", marginLeft: "8px", color: confidence.poNumber >= 80 ? "#4ade80" : "#fbbf24" }}>
-                  ({confidence.poNumber}% match)
-                </span>
-              )}
-            </label>
-            <input
-              type="text"
-              name="poNumber"
-              value={formData.poNumber}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label>
-              Company
-              {formData.company && confidence.company > 0 && (
-                <span style={{ fontSize: "11px", marginLeft: "8px", color: confidence.company >= 80 ? "#4ade80" : "#fbbf24" }}>
-                  ({confidence.company}% match)
-                </span>
-              )}
-            </label>
-            <select
-              name="company"
-              value={formData.company}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select Company</option>
-              {companyData.map((company) => (
-                <option key={company} value={company}>
-                  {company}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label>
-              Component
-              {formData.component && confidence.component > 0 && (
-                <span style={{ fontSize: "11px", marginLeft: "8px", color: confidence.component >= 80 ? "#4ade80" : "#fbbf24" }}>
-                  ({confidence.component}% match)
-                </span>
-              )}
-              {(() => {
-                const selected = dbComponents.find(c => c.component_name === formData.component);
-                if (selected && (selected.status === "Auto Created" || selected.isTemp)) {
-                  return (
-                    <span style={{
-                      background: "linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%)",
-                      color: "#ffffff",
-                      fontSize: "10px",
-                      padding: "2px 6px",
-                      borderRadius: "6px",
-                      marginLeft: "10px",
-                      fontWeight: "bold"
-                    }}>
-                      AI Discovered
-                    </span>
-                  );
+            <form onSubmit={handleSubmit} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+              <FormInput
+                label={
+                  <span>
+                    PO Number
+                    {formData.poNumber && confidence.poNumber > 0 && (
+                      <span style={{ fontSize: "11px", marginLeft: "8px", color: confidence.poNumber >= 80 ? "#4ade80" : "#fbbf24" }}>
+                        ({confidence.poNumber}% match)
+                      </span>
+                    )}
+                  </span>
                 }
-                return null;
-              })()}
-            </label>
-            <select
-              name="component"
-              value={formData.component}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select Component</option>
-              {dbComponents.map((item) => (
-                <option key={item.id} value={item.component_name}>
-                  {item.component_name} {item.status === "Auto Created" || item.isTemp ? "[AI Discovered]" : ""}
-                </option>
-              ))}
-            </select>
-          </div>
+                name="poNumber"
+                value={formData.poNumber}
+                onChange={handleChange}
+                required
+              />
 
-          <div className="form-group">
-            <label>
-              Plant
-              {formData.plant && confidence.plant > 0 && (
-                <span style={{ fontSize: "11px", marginLeft: "8px", color: confidence.plant >= 80 ? "#4ade80" : "#fbbf24" }}>
-                  ({confidence.plant}% match)
-                </span>
-              )}
-            </label>
-            <select
-              name="plant"
-              value={formData.plant}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select Plant</option>
-              <option value="1">Plant 1</option>
-              <option value="2">Plant 2</option>
-              <option value="3">Plant 3</option>
-              <option value="5">Plant 5</option>
-              <option value="7">Plant 7</option>
-            </select>
-          </div>
+              <FormSelect
+                label={
+                  <span>
+                    Company
+                    {formData.company && confidence.company > 0 && (
+                      <span style={{ fontSize: "11px", marginLeft: "8px", color: confidence.company >= 80 ? "#4ade80" : "#fbbf24" }}>
+                        ({confidence.company}% match)
+                      </span>
+                    )}
+                  </span>
+                }
+                name="company"
+                value={formData.company}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select Company</option>
+                {companyData.map((company) => (
+                  <option key={company} value={company}>
+                    {company}
+                  </option>
+                ))}
+              </FormSelect>
 
-          <div className="form-group">
-            <label>
-              Ordered Quantity
-              {formData.orderedQty && confidence.orderedQty > 0 && (
-                <span style={{ fontSize: "11px", marginLeft: "8px", color: confidence.orderedQty >= 80 ? "#4ade80" : "#fbbf24" }}>
-                  ({confidence.orderedQty}% match)
-                </span>
-              )}
-            </label>
-            <input
-              type="number"
-              name="orderedQty"
-              value={formData.orderedQty}
-              onChange={handleChange}
-              required
-            />
-          </div>
+              <FormSelect
+                label={
+                  <span>
+                    Component
+                    {formData.component && confidence.component > 0 && (
+                      <span style={{ fontSize: "11px", marginLeft: "8px", color: confidence.component >= 80 ? "#4ade80" : "#fbbf24" }}>
+                        ({confidence.component}% match)
+                      </span>
+                    )}
+                    {(() => {
+                      const selected = dbComponents.find(c => c.component_name === formData.component);
+                      if (selected && (selected.status === "Auto Created" || selected.isTemp)) {
+                        return (
+                          <span style={{
+                            background: "linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%)",
+                            color: "#ffffff",
+                            fontSize: "10px",
+                            padding: "2px 6px",
+                            borderRadius: "6px",
+                            marginLeft: "10px",
+                            fontWeight: "bold"
+                          }}>
+                            AI Discovered
+                          </span>
+                        );
+                      }
+                      return null;
+                    })()}
+                  </span>
+                }
+                name="component"
+                value={formData.component}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select Component</option>
+                {dbComponents.map((item) => (
+                  <option key={item.id} value={item.component_name}>
+                    {item.component_name} {item.status === "Auto Created" || item.isTemp ? "[AI Discovered]" : ""}
+                  </option>
+                ))}
+              </FormSelect>
 
-          <div className="form-group">
-            <label>
-              Rate
-              {formData.rate && confidence.rate > 0 && (
-                <span style={{ fontSize: "11px", marginLeft: "8px", color: confidence.rate >= 80 ? "#4ade80" : "#fbbf24" }}>
-                  ({confidence.rate}% match)
-                </span>
-              )}
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              name="rate"
-              value={formData.rate}
-              onChange={handleChange}
-              required
-            />
-          </div>
+              <FormSelect
+                label={
+                  <span>
+                    Plant
+                    {formData.plant && confidence.plant > 0 && (
+                      <span style={{ fontSize: "11px", marginLeft: "8px", color: confidence.plant >= 80 ? "#4ade80" : "#fbbf24" }}>
+                        ({confidence.plant}% match)
+                      </span>
+                    )}
+                  </span>
+                }
+                name="plant"
+                value={formData.plant}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select Plant</option>
+                <option value="1">Plant 1</option>
+                <option value="2">Plant 2</option>
+                <option value="3">Plant 3</option>
+                <option value="5">Plant 5</option>
+                <option value="7">Plant 7</option>
+              </FormSelect>
 
-          <div className="form-group" style={{ gridColumn: "span 2" }}>
-            <label>
-              PO Date
-              {formData.poDate && confidence.poDate > 0 && (
-                <span style={{ fontSize: "11px", marginLeft: "8px", color: confidence.poDate >= 80 ? "#4ade80" : "#fbbf24" }}>
-                  ({confidence.poDate}% match)
-                </span>
-              )}
-            </label>
-            <input
-              type="date"
-              name="poDate"
-              value={formData.poDate}
-              onChange={handleChange}
-              required
-            />
-          </div>
+              <FormInput
+                label={
+                  <span>
+                    Ordered Quantity
+                    {formData.orderedQty && confidence.orderedQty > 0 && (
+                      <span style={{ fontSize: "11px", marginLeft: "8px", color: confidence.orderedQty >= 80 ? "#4ade80" : "#fbbf24" }}>
+                        ({confidence.orderedQty}% match)
+                      </span>
+                    )}
+                  </span>
+                }
+                type="number"
+                name="orderedQty"
+                value={formData.orderedQty}
+                onChange={handleChange}
+                required
+              />
 
-          <button type="submit" className="submit-order-btn" style={{ gridColumn: "span 2" }}>
-            Save Purchase Order
-          </button>
-        </form>
+              <FormInput
+                label={
+                  <span>
+                    Rate
+                    {formData.rate && confidence.rate > 0 && (
+                      <span style={{ fontSize: "11px", marginLeft: "8px", color: confidence.rate >= 80 ? "#4ade80" : "#fbbf24" }}>
+                        ({confidence.rate}% match)
+                      </span>
+                    )}
+                  </span>
+                }
+                type="number"
+                step="0.01"
+                name="rate"
+                value={formData.rate}
+                onChange={handleChange}
+                required
+              />
+
+              <div style={{ gridColumn: "span 2" }}>
+                <FormDatePicker
+                  label={
+                    <span>
+                      PO Date
+                      {formData.poDate && confidence.poDate > 0 && (
+                        <span style={{ fontSize: "11px", marginLeft: "8px", color: confidence.poDate >= 80 ? "#4ade80" : "#fbbf24" }}>
+                          ({confidence.poDate}% match)
+                        </span>
+                      )}
+                    </span>
+                  }
+                  name="poDate"
+                  value={formData.poDate}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div style={{ gridColumn: "span 2", display: "flex", justifyContent: "flex-end", marginTop: "10px" }}>
+                <FormButton type="submit" variant="primary" style={{ width: "100%" }}>
+                  Save Purchase Order
+                </FormButton>
+              </div>
+            </form>
+          </GlassCard>
+        </FadeContent>
       </div>
     </div>
   );

@@ -902,7 +902,7 @@ button:hover,
   border-radius: 20px !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35) !important;
   padding: 24px !important;
-  min-height: 420px !important;
+  min-height: fit-content !important;
   width: 100% !important;
   display: flex !important;
   flex-direction: column !important;
@@ -923,3 +923,50 @@ button:hover,
   flex: 1 !important;
   position: relative !important;
 }
+
+/* =========================
+   GLOBAL DESIGN SYSTEM OVERRIDES
+========================= */
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-loader {
+  animation: shimmer 1.5s infinite linear;
+}
+
+/* Standardize dropdown focus states and visibility */
+select, option {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+select:focus,
+input:focus,
+textarea:focus {
+  border-color: rgba(99, 102, 241, 0.6) !important;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.25) !important;
+}
+
+/* Global button styles */
+.dashboard-btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  transition: all 0.3s ease;
+}
+.dashboard-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.table-row-hover:hover {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}

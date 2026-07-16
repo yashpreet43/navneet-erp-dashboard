@@ -4,6 +4,10 @@ import * as pdfjsLib from "pdfjs-dist";
 import Tesseract from "tesseract.js";
 
 import Sidebar from "../components/Sidebar";
+import PageHeader from "../components/common/PageHeader";
+import FadeContent from "../components/animations/FadeContent";
+import GlassCard from "../components/common/GlassCard";
+import { FormInput, FormSelect, FormTextarea, FormDatePicker, FormButton } from "../components/common/FormComponents";
 import { supabase } from "../supabaseClient";
 
 // Set worker source for pdfjsLib locally
@@ -247,121 +251,122 @@ function AddExpense() {
       <Sidebar />
 
       <div className="main-content">
-        <h1>Add Expense</h1>
+        <FadeContent blur={true} duration={800} initialOpacity={0}>
+          <PageHeader
+            title="Add Expense"
+            subtitle="Log operational expenses manually or auto-extract utility bills."
+          />
 
-        <div className="dashboard-card">
-          {/* Upload Bill Component */}
-          <div style={{ marginBottom: "25px", borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "20px" }}>
-            <label style={{ display: "block", fontSize: "14px", color: "#cbd5e1", marginBottom: "10px" }}>
-              Upload Bill (PDF or Image - Electricity & Water only)
-            </label>
-            <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
-              <input
-                type="file"
-                accept=".pdf,image/*"
-                id="bill-upload"
-                style={{ display: "none" }}
-                onChange={handleFileChange}
-                disabled={isUploading}
-              />
-              <label
-                htmlFor="bill-upload"
-                className="dashboard-btn"
-                style={{
-                  cursor: "pointer",
-                  display: "inline-block",
-                  margin: 0,
-                  textAlign: "center"
-                }}
-              >
-                {isUploading ? "Processing..." : "Upload Bill"}
+          <GlassCard style={{ maxWidth: "600px", margin: "0 auto" }}>
+            {/* Upload Bill Component */}
+            <div style={{ marginBottom: "25px", borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "20px" }}>
+              <label style={{ display: "block", fontSize: "14px", color: "#cbd5e1", marginBottom: "10px", fontWeight: 600 }}>
+                Upload Bill (PDF or Image - Electricity & Water only)
               </label>
-              {uploadedDocName && (
-                <span style={{ fontSize: "14px", color: "#4ade80" }}>
-                  📎 {uploadedDocName}
-                </span>
+              <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
+                <input
+                  type="file"
+                  accept=".pdf,image/*"
+                  id="bill-upload"
+                  style={{ display: "none" }}
+                  onChange={handleFileChange}
+                  disabled={isUploading}
+                />
+                <label
+                  htmlFor="bill-upload"
+                  className="dashboard-btn"
+                  style={{
+                    cursor: "pointer",
+                    display: "inline-block",
+                    margin: 0,
+                    textAlign: "center"
+                  }}
+                >
+                  {isUploading ? "Processing..." : "Upload Bill"}
+                </label>
+                {uploadedDocName && (
+                  <span style={{ fontSize: "14px", color: "#4ade80" }}>
+                    📎 {uploadedDocName}
+                  </span>
+                )}
+              </div>
+              {isUploading && (
+                <div style={{ marginTop: "10px", fontSize: "13px", color: "#60a5fa" }}>
+                  ⏳ {uploadStatus}
+                </div>
+              )}
+              {errorMessage && (
+                <div style={{ marginTop: "10px", fontSize: "13px", color: "#f87171" }}>
+                  ❌ {errorMessage}
+                </div>
               )}
             </div>
-            {isUploading && (
-              <div style={{ marginTop: "10px", fontSize: "13px", color: "#60a5fa" }}>
-                ⏳ {uploadStatus}
-              </div>
-            )}
-            {errorMessage && (
-              <div style={{ marginTop: "10px", fontSize: "13px", color: "#f87171" }}>
-                ❌ {errorMessage}
-              </div>
-            )}
-          </div>
 
-          <label style={{ fontSize: "14px", color: "#cbd5e1" }}>Bill Date</label>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              <FormDatePicker
+                label="Bill Date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+              />
 
-          <br /><br />
+              <FormSelect
+                label="Category"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                <option value="">Select Category</option>
+                <option value="Electricity">Electricity</option>
+                <option value="Water">Water</option>
+                <option value="Labour">Labour</option>
+                <option value="GST">GST</option>
+                <option value="Raw Material">Raw Material</option>
+                <option value="Maintenance">Maintenance</option>
+              </FormSelect>
 
-          <label style={{ fontSize: "14px", color: "#cbd5e1" }}>Category</label>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
-            <option value="">Select Category</option>
-            <option value="Electricity">Electricity</option>
-            <option value="Water">Water</option>
-            <option value="Labour">Labour</option>
-            <option value="GST">GST</option>
-            <option value="Raw Material">Raw Material</option>
-            <option value="Maintenance">Maintenance</option>
-          </select>
+              <FormInput
+                label="Description"
+                placeholder="Enter description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
 
-          <br /><br />
+              <FormInput
+                label="Amount (₹)"
+                type="number"
+                placeholder="Enter amount"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+              />
 
-          <label style={{ fontSize: "14px", color: "#cbd5e1" }}>Description</label>
-          <input
-            type="text"
-            placeholder="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
+              <FormSelect
+                label="Payment Method"
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+              >
+                <option value="">Select Payment Method</option>
+                <option value="Cash">Cash</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="UPI">UPI</option>
+                <option value="Cheque">Cheque</option>
+              </FormSelect>
 
-          <br /><br />
+              <FormTextarea
+                label="Remarks"
+                placeholder="Add comments or remarks..."
+                value={remarks}
+                onChange={(e) => setRemarks(e.target.value)}
+              />
 
-          <label style={{ fontSize: "14px", color: "#cbd5e1" }}>Amount (₹)</label>
-          <input
-            type="number"
-            placeholder="Amount"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-          />
-
-          <br /><br />
-
-          <label style={{ fontSize: "14px", color: "#cbd5e1" }}>Payment Method</label>
-          <input
-            type="text"
-            placeholder="Payment Method"
-            value={paymentMethod}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-          />
-
-          <br /><br />
-
-          <label style={{ fontSize: "14px", color: "#cbd5e1" }}>Remarks</label>
-          <textarea
-            placeholder="Remarks"
-            value={remarks}
-            onChange={(e) => setRemarks(e.target.value)}
-          />
-
-          <br /><br />
-
-          <button onClick={saveExpense}>
-            Save Expense
-          </button>
-        </div>
+              <FormButton
+                variant="primary"
+                onClick={saveExpense}
+                style={{ marginTop: "10px", width: "100%" }}
+              >
+                Save Expense
+              </FormButton>
+            </div>
+          </GlassCard>
+        </FadeContent>
       </div>
     </div>
   );

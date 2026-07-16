@@ -1,64 +1,67 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-
-import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
+import PageHeader from "../components/common/PageHeader";
+import FadeContent from "../components/animations/FadeContent";
+import GlassCard from "../components/common/GlassCard";
+import DataTable from "../components/common/DataTable";
+import KPICard from "../components/common/KPICard";
+import StatusBadge from "../components/common/StatusBadge";
+import { FormInput, FormSelect, FormDatePicker, FormButton } from "../components/common/FormComponents";
 import { supabase } from "../supabaseClient";
+import componentsData from "../data/componentsData.json";
 
 function OrderHistory() {
-
   const { component } = useParams();
+  const componentName = decodeURIComponent(component);
 
-  const [selectedPO, setSelectedPO] =
-    useState("");
-
-  const [orders, setOrders] =
-    useState([]);
-
-  const [dispatches, setDispatches] =
-    useState([]);
-
-  const [dispatchDate, setDispatchDate] =
-    useState("");
-
-  const [dispatchQty, setDispatchQty] =
-    useState("");
+  const [selectedPO, setSelectedPO] = useState("");
+  const [orders, setOrders] = useState([]);
+  const [dispatches, setDispatches] = useState([]);
+  const [dispatchDate, setDispatchDate] = useState("");
+  const [dispatchQty, setDispatchQty] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     loadData();
+
+    // Subscribe to dispatches and purchase_order_items changes to auto-update
+    const channel = supabase
+      .channel("order_history_changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "dispatches" },
+        () => loadData()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "purchase_order_items" },
+        () => loadData()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [component]);
 
   async function loadData() {
-
-    const componentName =
-      decodeURIComponent(component);
-
-    const {
-      data: componentData,
-      error: componentError
-    } = await supabase
+    setIsLoading(true);
+    const { data: componentData, error: componentError } = await supabase
       .from("components")
       .select("id")
-      .eq(
-        "component_name",
-        componentName
-      )
+      .eq("component_name", componentName)
       .single();
 
-    if (
-      componentError ||
-      !componentData
-    ) {
+    if (componentError || !componentData) {
       console.log(componentError);
+      setIsLoading(false);
       return;
     }
 
-    const componentId =
-      componentData.id;
+    const componentId = componentData.id;
 
-    const {
-      data: poItems,
-      error: poError
-    } = await supabase
+    const { data: poItems, error: poError } = await supabase
       .from("purchase_order_items")
       .select(`
         id,
@@ -68,13 +71,17 @@ function OrderHistory() {
         purchase_orders (
           po_number,
           po_date,
-          plant
+          plant,
+          companies (
+            company_name
+          )
         )
       `)
       .eq("component_id", componentId);
 
     if (poError) {
       console.log(poError);
+      setIsLoading(false);
       return;
     }
 
@@ -94,501 +101,249 @@ function OrderHistory() {
       }
     }
 
-    const itemIds =
-      poItems.map(
-        (item) => item.id
-      );
+    const itemIds = poItems.map((item) => item.id);
 
-    if (
-      itemIds.length === 0
-    ) {
+    if (itemIds.length === 0) {
       setOrders([]);
       setDispatches([]);
+      setIsLoading(false);
       return;
     }
 
-    const {
-      data: dispatchData,
-      error: dispatchError
-    } = await supabase
+    const { data: dispatchData, error: dispatchError } = await supabase
       .from("dispatches")
       .select("*")
-      .in(
-        "purchase_order_item_id",
-        itemIds
-      )
-      .order(
-        "dispatch_date",
-        {
-          ascending: false
-        }
-      );
+      .in("purchase_order_item_id", itemIds)
+      .order("dispatch_date", { ascending: false });
 
+    setIsLoading(false);
     if (dispatchError) {
       console.log(dispatchError);
       return;
     }
 
-    const dispatchList =
-      dispatchData || [];
+    const dispatchList = dispatchData || [];
+    setDispatches(dispatchList);
 
-    setDispatches(
-      dispatchList
-    );
+    const catalogItem = componentsData.find(c => c.name?.toLowerCase() === componentName.toLowerCase());
+    const fallbackPrice = catalogItem && catalogItem.price ? Number(catalogItem.price) : 5.0;
 
-    const updatedOrders =
-      poItems.map((item) => {
+    const updatedOrders = poItems.map((item) => {
+      const itemDispatches = dispatchList.filter((d) => d.purchase_order_item_id === item.id);
+      const deliveredQty = itemDispatches.reduce((sum, d) => sum + Number(d.dispatched_qty || 0), 0);
 
-        const deliveredQty =
-          dispatchList
-            .filter(
-              (d) =>
-                d.purchase_order_item_id ===
-                item.id
-            )
-            .reduce(
-              (sum, d) =>
-                sum +
-                Number(
-                  d.dispatched_qty
-                ),
-              0
-            );
+      const pendingQty = Number(item.ordered_qty || 0) - deliveredQty;
+      const completion =
+        item.ordered_qty > 0
+          ? Math.min(100, Math.round((deliveredQty / item.ordered_qty) * 100))
+          : 0;
 
-        const pendingQty =
-          item.ordered_qty -
-          deliveredQty;
+      let status = "Pending";
+      if (deliveredQty === 0) {
+        status = "Pending";
+      } else if (deliveredQty > 0 && pendingQty > 0) {
+        status = "In Production";
+      } else if (pendingQty <= 0) {
+        status = "Completed";
+      }
 
-        const completion =
-          item.ordered_qty > 0
-            ? Math.round(
-                (deliveredQty /
-                  item.ordered_qty) * 100
-              )
-            : 0;
+      // Completion Date: date of the last dispatch if completed
+      let completionDate = "N/A";
+      if (status === "Completed" && itemDispatches.length > 0) {
+        const dates = itemDispatches.map(d => new Date(d.dispatch_date));
+        const maxDate = new Date(Math.max(...dates));
+        completionDate = maxDate.toLocaleDateString("en-CA");
+      }
 
-        let status = "";
+      // Total Order Value
+      const rate = Number(item.rate || 0) > 0 ? Number(item.rate) : fallbackPrice;
+      const totalOrderValue = item.ordered_qty * rate;
 
-        if (completion === 100) {
-          status = "Completed";
-        }
-        else if (
-          completion >= 70
-        ) {
-          status =
-            "Nearly Complete";
-        }
-        else {
-          status =
-            "In Progress";
-        }
+      // Dispatch Timeline: comma separated list of dates & quantities
+      const sortedDispatches = [...itemDispatches].sort(
+        (a, b) => new Date(a.dispatch_date) - new Date(b.dispatch_date)
+      );
+      const dispatchTimeline = sortedDispatches.length > 0
+        ? sortedDispatches.map(d => `${d.dispatch_date} (${Number(d.dispatched_qty).toLocaleString()})`).join(", ")
+        : "No dispatches yet";
 
-        const doc = poDocs.find((d) => d.purchase_order_id === item.purchase_order_id);
+      const doc = poDocs.find((d) => d.purchase_order_id === item.purchase_order_id);
 
-        return {
-          purchase_order_id: item.purchase_order_id,
-          po_number: item.purchase_orders.po_number,
-          po_date: item.purchase_orders.po_date,
-          plant: item.purchase_orders.plant,
-          ordered_qty: item.ordered_qty,
-          dispatched_qty: deliveredQty,
-          pending_qty: pendingQty,
-          completion,
-          status,
-          po_document_url: doc ? doc.file_url : null,
-          purchase_order_item_id: item.id
-        };
-      });
+      return {
+        purchase_order_id: item.purchase_order_id,
+        po_number: item.purchase_orders.po_number,
+        po_date: item.purchase_orders.po_date,
+        plant: item.purchase_orders.plant,
+        ordered_qty: item.ordered_qty,
+        dispatched_qty: deliveredQty,
+        pending_qty: pendingQty,
+        completion,
+        status,
+        completion_date: completionDate,
+        total_value: totalOrderValue,
+        dispatch_timeline: dispatchTimeline,
+        po_document_url: doc ? doc.file_url : null,
+        purchase_order_item_id: item.id
+      };
+    });
 
-    setOrders(
-      updatedOrders
-    );
+    setOrders(updatedOrders);
   }
 
   async function addDispatch() {
-
-    if (
-      !selectedPO ||
-      !dispatchDate ||
-      !dispatchQty
-    ) {
-
-      alert(
-        "Enter date and quantity"
-      );
-
+    if (!selectedPO || !dispatchDate || !dispatchQty) {
+      alert("Enter date and quantity");
       return;
     }
 
-    const order =
-      orders.find(
-        (o) =>
-          String(
-            o.purchase_order_item_id
-          ) === selectedPO
-      );
-
-    if (
-      Number(dispatchQty) >
-      Number(order.pending_qty)
-    ) {
-
-      alert(
-        "Dispatch quantity exceeds pending quantity"
-      );
-
-      return;
-    }
-
-    const { error } =
-      await supabase
-        .from("dispatches")
-        .insert([
-          {
-            purchase_order_item_id:
-              order.purchase_order_item_id,
-
-            dispatch_date:
-              dispatchDate,
-
-            dispatched_qty:
-              Number(dispatchQty)
-          }
-        ]);
-
-    if (error) {
-
-      console.log(error);
-
-      alert(
-        "Error saving dispatch"
-      );
-
-      return;
-    }
-
-    alert(
-      "Dispatch Added Successfully"
+    const order = orders.find(
+      (o) => String(o.purchase_order_item_id) === selectedPO
     );
 
+    if (Number(dispatchQty) > Number(order.pending_qty)) {
+      alert("Dispatch quantity exceeds pending quantity");
+      return;
+    }
+
+    const { error } = await supabase.from("dispatches").insert([
+      {
+        purchase_order_item_id: order.purchase_order_item_id,
+        dispatch_date: dispatchDate,
+        dispatched_qty: Number(dispatchQty)
+      }
+    ]);
+
+    if (error) {
+      console.log(error);
+      alert("Error saving dispatch");
+      return;
+    }
+
+    alert("Dispatch Added Successfully");
     setDispatchDate("");
     setDispatchQty("");
     setSelectedPO("");
-
     loadData();
   }
 
-  const completedCount =
-    orders.filter(
-      o =>
-        o.status ===
-        "Completed"
-    ).length;
+  const completedCount = orders.filter((o) => o.status === "Completed").length;
+  const inProductionCount = orders.filter((o) => o.status === "In Production").length;
+  const pendingCount = orders.filter((o) => o.status === "Pending").length;
 
-  const nearCount =
-    orders.filter(
-      o =>
-        o.status ===
-        "Nearly Complete"
-    ).length;
+  const poColumns = [
+    { header: "PO Number", render: (item) => item.po_number || "Legacy Order" },
+    { header: "Plant", key: "plant" },
+    { header: "Ordered Quantity", render: (item) => Number(item.ordered_qty || 0).toLocaleString() },
+    { header: "Pending Quantity", render: (item) => Number(item.pending_qty || 0).toLocaleString() },
+    {
+      header: "Status",
+      render: (item) => <StatusBadge status={item.status} />
+    },
+    { header: "Order Date", key: "po_date" },
+    {
+      header: "Actions",
+      render: (item) =>
+        item.po_document_url ? (
+          <FormButton
+            variant="secondary"
+            onClick={() => window.open(item.po_document_url, "_blank")}
+            style={{ padding: "6px 12.5px", fontSize: "12.5px" }}
+          >
+            📎 View PO
+          </FormButton>
+        ) : (
+          <span style={{ fontSize: "12.5px", color: "#64748b" }}>Manual Entry</span>
+        )
+    }
+  ];
 
-  const progressCount =
-    orders.filter(
-      o =>
-        o.status ===
-        "In Progress"
-    ).length;
+  const dispatchColumns = [
+    { header: "Date", key: "dispatch_date" },
+    { header: "Delivered Qty", render: (item) => Number(item.dispatched_qty || 0).toLocaleString() }
+  ];
 
   return (
+    <div className="layout">
+      <Sidebar />
 
-    <div>
+      <div className="main-content">
+        <FadeContent blur={true} duration={800} initialOpacity={0}>
+          <PageHeader
+            title={componentName}
+            subtitle="Track pending purchase orders, dispatch history, and log dispatch dispatches."
+          />
 
-      <Navbar />
-
-      <div className="history-page">
-
-        <h1>
-          {decodeURIComponent(
-            component
-          )}
-        </h1>
-
-        <div className="machine-stats">
-
-          <div className="machine-box">
-            <h3>
-              {completedCount}
-            </h3>
-            <p>Completed</p>
+           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "20px", marginBottom: "25px" }}>
+            <KPICard title="Completed" value={completedCount} statusColor="#10b981" />
+            <KPICard title="In Production" value={inProductionCount} statusColor="#8b5cf6" />
+            <KPICard title="Pending" value={pendingCount} statusColor="#3b82f6" />
           </div>
 
-          <div className="machine-box">
-            <h3>
-              {nearCount}
-            </h3>
-            <p>Nearly Complete</p>
-          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "30px" }}>
+            <GlassCard title="Purchase Orders" subtitle="Purchase orders matching this component catalog specification.">
+              <DataTable
+                columns={poColumns}
+                data={orders}
+                isLoading={isLoading}
+                emptyMessage="No purchase orders found for this component."
+              />
+            </GlassCard>
 
-          <div className="machine-box">
-            <h3>
-              {progressCount}
-            </h3>
-            <p>In Progress</p>
-          </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "25px", alignItems: "start" }}>
+              <GlassCard title="Dispatch History" subtitle="List of historic dispatch logs.">
+                <DataTable
+                  columns={dispatchColumns}
+                  data={dispatches}
+                  isLoading={isLoading}
+                  emptyMessage="No dispatch records logged."
+                />
+              </GlassCard>
 
-        </div>
-
-        <div className="purchase-orders-table">
-
-          <h2>
-            Purchase Orders
-          </h2>
-
-          <div className="table-container">
-            <table className="history-table">
-
-            <thead>
-
-              <tr>
-                <th>PO Number</th>
-                <th>Date</th>
-                <th>Ordered</th>
-                <th>Delivered</th>
-                <th>Pending</th>
-                <th>Plant</th>
-                <th>Completion</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-
-            </thead>
-
-            <tbody>
-
-              {orders.map(
-                (order, index) => (
-
-                <tr key={index}>
-
-                  <td>
-                    {order.po_number}
-                  </td>
-
-                  <td>
-                    {order.po_date}
-                  </td>
-
-                  <td>
-                    {order.ordered_qty}
-                  </td>
-
-                  <td>
-                    {order.dispatched_qty}
-                  </td>
-
-                  <td>
-                    {order.pending_qty}
-                  </td>
-
-                  <td>
-                    {order.plant}
-                  </td>
-
-                  <td>
-
-                    <div className="progress-bar">
-
-                      <div
-                        className="progress-fill"
-                        style={{
-                          width:
-                            `${order.completion}%`
-                        }}
-                      />
-
-                    </div>
-
-                    {order.completion}%
-
-                  </td>
-
-                  <td>
-
-                    <span
-                      className={`status-badge ${order.status
-                        .toLowerCase()
-                        .replace(
-                          " ",
-                          "-"
-                        )}`}
-                    >
-
-                      {order.status}
-
-                    </span>
-
-                  </td>
-
-                  <td>
-                    {order.po_document_url ? (
-                      <a
-                        href={order.po_document_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="dashboard-btn"
-                        style={{
-                          padding: "6px 12px",
-                          fontSize: "12px",
-                          textDecoration: "none",
-                          background: "rgba(255, 255, 255, 0.08) !important",
-                          margin: 0,
-                          display: "inline-block"
-                        }}
+              <GlassCard title="Add Dispatch Entry" subtitle="Record a physical component dispatch delivery.">
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  <FormSelect
+                    label="Select PO Number"
+                    value={selectedPO}
+                    onChange={(e) => setSelectedPO(e.target.value)}
+                  >
+                    <option value="">Select PO Number</option>
+                    {orders.map((order) => (
+                      <option
+                        key={order.po_number}
+                        value={order.purchase_order_item_id}
                       >
-                        📎 View PO
-                      </a>
-                    ) : (
-                      <span style={{ fontSize: "12px", color: "#6b7280" }}>Manual</span>
-                    )}
-                  </td>
+                        {order.po_number}
+                      </option>
+                    ))}
+                  </FormSelect>
 
-                </tr>
+                  <FormDatePicker
+                    label="Dispatch Date"
+                    value={dispatchDate}
+                    onChange={(e) => setDispatchDate(e.target.value)}
+                  />
 
-              ))}
+                  <FormInput
+                    label="Dispatch Quantity"
+                    type="number"
+                    placeholder="Enter dispatch quantity"
+                    value={dispatchQty}
+                    onChange={(e) => setDispatchQty(e.target.value)}
+                  />
 
-            </tbody>
-
-          </table>
+                  <FormButton
+                    variant="primary"
+                    onClick={addDispatch}
+                    style={{ marginTop: "10px", alignSelf: "flex-end" }}
+                  >
+                    Save Dispatch
+                  </FormButton>
+                </div>
+              </GlassCard>
+            </div>
           </div>
-
-        </div>
-
-        <div className="dispatch-history-table">
-
-          <h2>
-            Dispatch History
-          </h2>
-
-          <div className="table-container">
-            <table className="history-table">
-
-            <thead>
-
-              <tr>
-                <th>Date</th>
-                <th>Delivered Qty</th>
-              </tr>
-
-            </thead>
-
-            <tbody>
-
-              {dispatches.map(
-                (dispatch) => (
-
-                <tr
-                  key={
-                    dispatch.id
-                  }
-                >
-
-                  <td>
-                    {
-                      dispatch.dispatch_date
-                    }
-                  </td>
-
-                  <td>
-                    {
-                      dispatch.dispatched_qty
-                    }
-                  </td>
-
-                </tr>
-
-              ))}
-
-            </tbody>
-
-          </table>
-          </div>
-
-        </div>
-
-        <div className="dispatch-form">
-
-          <h2>
-            Add Dispatch Entry
-          </h2>
-
-          <select
-            value={selectedPO}
-            onChange={(e) =>
-              setSelectedPO(
-                e.target.value
-              )
-            }
-          >
-
-            <option value="">
-              Select PO Number
-            </option>
-
-            {orders.map(
-              (order) => (
-
-              <option
-                key={
-                  order.po_number
-                }
-                value={
-                  order.purchase_order_item_id
-                }
-              >
-
-                {
-                  order.po_number
-                }
-
-              </option>
-
-            ))}
-
-          </select>
-
-          <input
-            type="date"
-            value={dispatchDate}
-            onChange={(e) =>
-              setDispatchDate(
-                e.target.value
-              )
-            }
-          />
-
-          <input
-            type="number"
-            placeholder="Dispatch Quantity"
-            value={dispatchQty}
-            onChange={(e) =>
-              setDispatchQty(
-                e.target.value
-              )
-            }
-          />
-
-          <button
-            onClick={
-              addDispatch
-            }
-          >
-            Save Dispatch
-          </button>
-
-        </div>
-
+        </FadeContent>
       </div>
-
     </div>
   );
 }

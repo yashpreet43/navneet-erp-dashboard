@@ -4,6 +4,10 @@ import { motion } from "framer-motion";
 
 import { supabase } from "../supabaseClient";
 import Sidebar from "../components/Sidebar";
+import PageHeader from "../components/common/PageHeader";
+import FadeContent from "../components/animations/FadeContent";
+import GlassModal from "../components/common/GlassModal";
+import { FormInput, FormButton } from "../components/common/FormComponents";
 import "../styles/home.css";
 
 import {
@@ -512,6 +516,23 @@ function Home() {
     requestAnimationFrame(() => {
       setIsMounted(true);
     });
+
+    // Subscribe to dispatches realtime updates
+    const channel = supabase
+      .channel("dispatches_changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "dispatches" },
+        (payload) => {
+          console.log("Realtime dispatch update detected:", payload);
+          loadData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const handleSaveTarget = async (amount) => {
@@ -521,7 +542,7 @@ function Home() {
     setTodayTarget(val);
     setIsEditingTarget(false);
     
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = new Date().toLocaleDateString("en-CA");
     localStorage.setItem(`daily_target_${todayStr}`, val);
     
     try {
@@ -577,7 +598,12 @@ function Home() {
         `);
       if (e3) console.error("Error fetching dispatches:", e3.message);
 
-      const todayStr = new Date().toISOString().split("T")[0];
+      const todayStr = new Date().toLocaleDateString("en-CA");
+      console.log("Fetched dispatch count:", dispatchData ? dispatchData.length : 0);
+      console.log("Today's date value:", todayStr);
+      const matchedCount = (dispatchData || []).filter(d => d.dispatch_date === todayStr).length;
+      console.log("Matched dispatch count for today:", matchedCount);
+
       const { data: targetData, error: e4 } = await supabase
         .from("daily_targets")
         .select("target_amount")
@@ -608,11 +634,72 @@ function Home() {
       ANALYTICS
   =================== */
 
-  const todayStr = new Date().toISOString().split("T")[0];
+  // Helper to look up component selling prices with a smart fuzzy matcher
+  const getSellingPrice = (compName, fallbackRate) => {
+    const rateNum = Number(fallbackRate || 0);
+    if (rateNum > 0) return rateNum;
+    if (!compName) return 0;
+    
+    const cleanName = compName.toLowerCase().replace(/[^a-z0-9]/g, "");
+    
+    // 1. Exact match
+    const exact = components.find(c => c.component_name?.toLowerCase() === compName.toLowerCase());
+    if (exact && exact.selling_price) return Number(exact.selling_price);
+    
+    // 2. Clean exact match
+    const cleanMatch = components.find(c => c.component_name?.toLowerCase().replace(/[^a-z0-9]/g, "") === cleanName);
+    if (cleanMatch && cleanMatch.selling_price) return Number(cleanMatch.selling_price);
+    
+    // 3. Partial matching (catalog item inside component name, or vice versa)
+    const sortedCatalog = [...components].sort((a, b) => (b.component_name?.length || 0) - (a.component_name?.length || 0));
+    for (const catItem of sortedCatalog) {
+      if (!catItem.component_name) continue;
+      const catClean = catItem.component_name.toLowerCase().replace(/[^a-z0-9]/g, "");
+      if (cleanName.includes(catClean) || catClean.includes(cleanName)) {
+        if (catItem.selling_price) return Number(catItem.selling_price);
+      }
+    }
+    
+    return 5.0; // Default price fallback
+  };
+
+  // Helper to fuzzy match component details for priority calculations
+  const getCompInfo = (compName) => {
+    if (!compName) return null;
+    const cleanName = compName.toLowerCase().replace(/[^a-z0-9]/g, "");
+    
+    const exact = components.find(c => c.component_name?.toLowerCase() === compName.toLowerCase());
+    if (exact) return exact;
+    
+    const cleanMatch = components.find(c => c.component_name?.toLowerCase().replace(/[^a-z0-9]/g, "") === cleanName);
+    if (cleanMatch) return cleanMatch;
+    
+    const sortedCatalog = [...components].sort((a, b) => (b.component_name?.length || 0) - (a.component_name?.length || 0));
+    for (const catItem of sortedCatalog) {
+      if (!catItem.component_name) continue;
+      const catClean = catItem.component_name.toLowerCase().replace(/[^a-z0-9]/g, "");
+      if (cleanName.includes(catClean) || catClean.includes(cleanName)) {
+        return catItem;
+      }
+    }
+    return null;
+  };
+
+  const todayStr = new Date().toLocaleDateString("en-CA");
   const dispatchesToday = dispatches.filter(d => d.dispatch_date === todayStr);
   const achievedToday = dispatchesToday.reduce((sum, d) => {
-    const rate = Number(d.purchase_order_items?.rate || 0);
-    return sum + Number(d.dispatched_qty || 0) * rate;
+    const compName = d.purchase_order_items?.components?.component_name;
+    const rate = getSellingPrice(compName, d.purchase_order_items?.rate);
+    const qty = Number(d.dispatched_qty || 0);
+    const val = qty * rate;
+    
+    // Temporary debug logging as requested by user
+    console.log("dispatchRecord:", d);
+    console.log("quantityField (dispatched_qty):", qty);
+    console.log("rateField (rate):", rate);
+    console.log("dispatchValue:", val);
+    
+    return sum + val;
   }, 0);
   const remainingToday = Math.max(0, todayTarget - achievedToday);
   const completionPercent = todayTarget > 0 ? (achievedToday / todayTarget) * 100 : 0;
@@ -641,8 +728,10 @@ function Home() {
       .reduce((sum, d) => sum + Number(d.dispatched_qty || 0), 0);
     const pendingQty = Math.max(0, Number(item.ordered_qty || 0) - totalDispatched);
     
-    const compInfo = components.find(c => c.component_name === item.components?.component_name);
-    const unitProfit = compInfo ? Number(compInfo.profit || 0) : Number(item.rate || 0) * 0.3;
+    const compName = item.components?.component_name;
+    const compInfo = getCompInfo(compName);
+    const fallbackRate = Number(item.rate || 0) > 0 ? Number(item.rate) : getSellingPrice(compName, 0);
+    const unitProfit = compInfo ? Number(compInfo.profit || 0) : fallbackRate * 0.3;
     const expectedProfit = unitProfit * pendingQty;
     
     const poDateStr = item.purchase_orders?.po_date;
@@ -674,11 +763,12 @@ function Home() {
     for (let i = 89; i >= 0; i--) {
       const d = new Date();
       d.setDate(today.getDate() - i);
-      const dateStr = d.toISOString().split("T")[0];
+      const dateStr = d.toLocaleDateString("en-CA");
       const dayDispatches = dispatches.filter(disp => disp.dispatch_date === dateStr);
       
       const dispatchValue = dayDispatches.reduce((sum, disp) => {
-        const rate = Number(disp.purchase_order_items?.rate || 0);
+        const compName = disp.purchase_order_items?.components?.component_name;
+        const rate = getSellingPrice(compName, disp.purchase_order_items?.rate);
         return sum + Number(disp.dispatched_qty || 0) * rate;
       }, 0);
       
@@ -827,22 +917,15 @@ function Home() {
   const contractorPercentage = 100 - employeePercentage;
 
   return (
-    <div className="home-page">
-      <div className="layout">
-        <Sidebar />
+    <div className="layout">
+      <Sidebar />
 
-        <motion.div
-          className="main-content"
-          variants={parentVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <motion.div className="dashboard-header" variants={childVariants}>
-            <h1>Manufacturing Intelligence Dashboard</h1>
-            <p>
-              Real-time production, profitability and operations analytics
-            </p>
-          </motion.div>
+      <div className="main-content">
+        <FadeContent blur={true} duration={800} initialOpacity={0}>
+          <PageHeader
+            title="Manufacturing Intelligence Dashboard"
+            subtitle="Real-time production, profitability, and operations control center."
+          />
 
           {/* OPERATIONS CONTROL CENTER */}
           <div className="operations-grid">
@@ -855,26 +938,12 @@ function Home() {
                 </div>
               </div>
               <div className="stat-card-content" style={{ marginTop: 10 }}>
-                {isEditingTarget ? (
-                  <div className="target-edit-mode">
-                    <input 
-                      type="number" 
-                      className="target-input" 
-                      value={tempTarget} 
-                      onChange={(e) => setTempTarget(e.target.value)} 
-                      placeholder="Enter target" 
-                    />
-                    <button className="save-btn" onClick={() => handleSaveTarget(tempTarget)}>Save</button>
-                    <button className="cancel-btn" onClick={() => setIsEditingTarget(false)}>Cancel</button>
-                  </div>
-                ) : (
-                  <div className="target-display">
-                    <span>Target: <strong>₹{Math.round(todayTarget).toLocaleString()}</strong></span>
-                    <button className="icon-btn" onClick={() => { setIsEditingTarget(true); setTempTarget(todayTarget.toString()); }} title="Edit Target">
-                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7m-7-7l8-8m0 0l2 2m-2-2v5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                    </button>
-                  </div>
-                )}
+                <div className="target-display">
+                  <span>Target: <strong>₹{Math.round(todayTarget).toLocaleString()}</strong></span>
+                  <button className="icon-btn" onClick={() => { setIsEditingTarget(true); setTempTarget(todayTarget.toString()); }} title="Edit Target">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7m-7-7l8-8m0 0l2 2m-2-2v5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </button>
+                </div>
 
                 <div style={{ marginTop: 15, fontSize: "14px", color: "#cbd5e1" }}>
                   Achieved: <strong style={{ color: "#10b981", fontSize: "16px" }}>₹{Math.round(achievedToday).toLocaleString()}</strong>
@@ -1928,8 +1997,33 @@ function Home() {
               </div>
             </div>
           </motion.section>
-        </motion.div>
+        </FadeContent>
       </div>
+
+      <GlassModal
+        isOpen={isEditingTarget}
+        onClose={() => setIsEditingTarget(false)}
+        title="Set Daily Dispatch Target"
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+          <FormInput
+            label="Target Amount (₹)"
+            type="number"
+            value={tempTarget}
+            onChange={(e) => setTempTarget(e.target.value)}
+            placeholder="e.g. 100,000"
+            required
+          />
+          <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+            <FormButton variant="secondary" onClick={() => setIsEditingTarget(false)}>
+              Cancel
+            </FormButton>
+            <FormButton variant="primary" onClick={() => handleSaveTarget(tempTarget)}>
+              Save Target
+            </FormButton>
+          </div>
+        </div>
+      </GlassModal>
     </div>
   );
 }
