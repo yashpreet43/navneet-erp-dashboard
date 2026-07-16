@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Sidebar from "../components/Sidebar";
 import PageHeader from "../components/common/PageHeader";
 import FadeContent from "../components/animations/FadeContent";
@@ -22,30 +22,7 @@ function OrderHistory() {
   const [dispatchQty, setDispatchQty] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    loadData();
-
-    // Subscribe to dispatches and purchase_order_items changes to auto-update
-    const channel = supabase
-      .channel("order_history_changes")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "dispatches" },
-        () => loadData()
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "purchase_order_items" },
-        () => loadData()
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [component]);
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
     setIsLoading(true);
     const { data: componentData, error: componentError } = await supabase
       .from("components")
@@ -188,7 +165,30 @@ function OrderHistory() {
     });
 
     setOrders(updatedOrders);
-  }
+  }, [componentName]);
+
+  useEffect(() => {
+    loadData();
+
+    // Subscribe to dispatches and purchase_order_items changes to auto-update
+    const channel = supabase
+      .channel("order_history_changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "dispatches" },
+        () => loadData()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "purchase_order_items" },
+        () => loadData()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [loadData]);
 
   async function addDispatch() {
     if (!selectedPO || !dispatchDate || !dispatchQty) {

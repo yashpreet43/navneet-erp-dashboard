@@ -78,7 +78,6 @@ const COLORS = ["#3b82f6", "#8b5cf6", "#10b981", "#f59e0b", "#ef4444", "#ec4899"
 function Expenses() {
   const navigate = useNavigate();
   const [expenses, setExpenses] = useState([]);
-  const [fetchError, setFetchError] = useState(null);
   const [activeTab, setActiveTab] = useState("log"); // "log" or "analytics"
   const [selectedMonth, setSelectedMonth] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -110,7 +109,7 @@ function Expenses() {
 
       setIsLoading(false);
       if (fallback.error) {
-        setFetchError(fallback.error.message);
+        console.error(fallback.error.message);
       } else {
         setExpenses(fallback.data || []);
       }

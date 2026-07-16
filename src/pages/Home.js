@@ -156,15 +156,6 @@ const renderActiveShape = (props) => {
 };
 
 // Staggered motion variants
-const parentVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
-};
 
 const childVariants = {
   hidden: { opacity: 0, y: 25 },

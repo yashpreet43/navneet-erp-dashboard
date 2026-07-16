@@ -1,5 +1,4 @@
 import React from "react";
-import theme from "../../styles/theme";
 
 export default function StatusBadge({ status }) {
   const normalized = (status || "").toLowerCase().trim();
