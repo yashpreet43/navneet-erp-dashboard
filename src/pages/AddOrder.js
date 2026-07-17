@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import * as pdfjsLib from "pdfjs-dist";
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf";
 import Tesseract from "tesseract.js";
 
 import Sidebar from "../components/Sidebar";
@@ -10,8 +10,9 @@ import { FormInput, FormSelect, FormDatePicker, FormButton } from "../components
 import companyData from "../data/companyData";
 import { supabase } from "../supabaseClient";
 
-// Set worker source for pdfjsLib using CDN
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// Set worker source for pdfjsLib using legacy unpkg build
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  "https://unpkg.com/pdfjs-dist@4.8.69/legacy/build/pdf.worker.min.mjs";
 
 // Component name normalization helper
 function normalizeComponentName(name) {
