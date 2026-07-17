@@ -10,11 +10,8 @@ import GlassCard from "../components/common/GlassCard";
 import { FormInput, FormSelect, FormTextarea, FormDatePicker, FormButton } from "../components/common/FormComponents";
 import { supabase } from "../supabaseClient";
 
-// Set worker source for pdfjsLib locally
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.mjs",
-  import.meta.url
-).toString();
+// Set worker source for pdfjsLib using CDN
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 function AddExpense() {
   const navigate = useNavigate();

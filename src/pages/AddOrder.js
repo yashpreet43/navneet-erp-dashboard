@@ -10,11 +10,8 @@ import { FormInput, FormSelect, FormDatePicker, FormButton } from "../components
 import companyData from "../data/companyData";
 import { supabase } from "../supabaseClient";
 
-// Set worker source for pdfjsLib locally using Webpack 5 URL constructor
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.mjs",
-  import.meta.url
-).toString();
+// Set worker source for pdfjsLib using CDN
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 // Component name normalization helper
 function normalizeComponentName(name) {
