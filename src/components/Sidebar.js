@@ -5,7 +5,7 @@ function Sidebar() {
     <div className="sidebar">
 
       <h2 className="sidebar-logo">
-        🏭 Navneet Industries
+        🏭 Navneet
       </h2>
 
       <div className="sidebar-links">
