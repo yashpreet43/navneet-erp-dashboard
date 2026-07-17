@@ -24,6 +24,122 @@ function normalizeComponentName(name) {
   return norm.trim();
 }
 
+// Robust table parser for structured rows (Serial No, Component, UOM, Qty, Rate, Value)
+function extractRKCLTableRows(text) {
+  const lines = text.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+  const items = [];
+  
+  // Exclude list for component names to prevent header text from being treated as component name
+  const excludeHeaders = [
+    "description", "hsn", "hsn/sac", "uom", "order qty", "qty", "rate", "value", 
+    "serial", "sl.no", "sl no", "material", "material description", "item", "total",
+    "grand total", "subtotal", "sub total", "purchasing document", "document date", "plant"
+  ];
+  
+  const isHeader = (name) => {
+    if (!name) return true;
+    const lower = name.toLowerCase().trim();
+    return excludeHeaders.some(h => lower.includes(h) || h.includes(lower)) || lower.length < 3;
+  };
+
+  // 1. Try single line regex match
+  for (let line of lines) {
+    const match = line.match(/^(\d+)\s+(.+?)\s+(EA|NOS|PCS)\s+([\d,]+(?:\.\d+)?)\s+([\d,]+(?:\.\d+)?)\s+([\d,]+(?:\.\d+)?)$/i);
+    if (match) {
+      const componentName = match[2].trim();
+      if (!isHeader(componentName)) {
+        items.push({
+          componentName,
+          orderedQty: Math.round(parseFloat(match[4].replace(/,/g, ""))).toString(),
+          rate: parseFloat(match[5].replace(/,/g, "")).toString(),
+          amount: parseFloat(match[6].replace(/,/g, "")).toString()
+        });
+      }
+    }
+  }
+
+  // 2. Try multi-line parsing with name and UOM on the same line
+  if (items.length === 0) {
+    for (let k = 0; k < lines.length - 4; k++) {
+      const isSerial = /^\d+$/.test(lines[k]);
+      const nameAndUom = lines[k+1];
+      const isQty = /^[\d,]+(?:\.\d+)?$/.test(lines[k+2]);
+      const isRate = /^[\d,]+(?:\.\d+)?$/.test(lines[k+3]);
+      const isVal = /^[\d,]+(?:\.\d+)?$/.test(lines[k+4]);
+      
+      if (isSerial && isQty && isRate && isVal) {
+        const uomMatch = nameAndUom.match(/(.+?)\s+(EA|NOS|PCS)$/i);
+        if (uomMatch) {
+          const name = uomMatch[1].trim();
+          if (!isHeader(name)) {
+            items.push({
+              componentName: name,
+              orderedQty: Math.round(parseFloat(lines[k+2].replace(/,/g, ""))).toString(),
+              rate: parseFloat(lines[k+3].replace(/,/g, "")).toString(),
+              amount: parseFloat(lines[k+4].replace(/,/g, "")).toString()
+            });
+            k += 4;
+          }
+        }
+      }
+    }
+  }
+
+  // 3. Try standard multi-line parsing (UOM is a standalone line)
+  if (items.length === 0) {
+    for (let k = 0; k < lines.length - 5; k++) {
+      const isSerial = /^\d+$/.test(lines[k]);
+      const name = lines[k+1];
+      const isUOM = /^(EA|NOS|PCS)$/i.test(lines[k+2]);
+      const isQty = /^[\d,]+(?:\.\d+)?$/.test(lines[k+3]);
+      const isRate = /^[\d,]+(?:\.\d+)?$/.test(lines[k+4]);
+      const isVal = /^[\d,]+(?:\.\d+)?$/.test(lines[k+5]);
+      
+      if (isSerial && isUOM && isQty && isRate && isVal && !isHeader(name)) {
+        items.push({
+          componentName: name,
+          orderedQty: Math.round(parseFloat(lines[k+3].replace(/,/g, ""))).toString(),
+          rate: parseFloat(lines[k+4].replace(/,/g, "")).toString(),
+          amount: parseFloat(lines[k+5].replace(/,/g, "")).toString()
+        });
+        k += 5;
+      }
+    }
+  }
+
+  return items;
+}
+
+const matchOrRegisterComponents = (items, currentDbComponents) => {
+  let updatedDbComponents = [...currentDbComponents];
+  const processedItems = items.map(item => {
+    const normalizedExtracted = normalizeComponentName(item.componentName);
+    const matchedComp = updatedDbComponents.find(
+      (c) => normalizeComponentName(c.component_name) === normalizedExtracted
+    );
+
+    let finalComponentName = item.componentName;
+    if (matchedComp) {
+      finalComponentName = matchedComp.component_name;
+    } else {
+      const tempComp = {
+        id: `temp-${Date.now()}-${Math.random()}`,
+        component_name: item.componentName,
+        status: "Auto Created",
+        isTemp: true,
+      };
+      updatedDbComponents.push(tempComp);
+    }
+    
+    return {
+      ...item,
+      componentName: finalComponentName
+    };
+  });
+
+  return { processedItems, updatedDbComponents };
+};
+
 function AddOrder() {
   const [formData, setFormData] = useState({
     poNumber: "",
@@ -36,6 +152,7 @@ function AddOrder() {
   });
 
   const [dbComponents, setDbComponents] = useState([]);
+  const [extractedComponents, setExtractedComponents] = useState([]);
 
   // OCR, upload, and confidence states
   const [isUploading, setIsUploading] = useState(false);
@@ -143,27 +260,42 @@ function AddOrder() {
 
       // Perform dynamic component matching
       let componentName = parsedData.component || formData.component;
-      let matchedComp = null;
+      let updatedDb = [...dbComponents];
+      let resolvedItems = [];
 
-      if (componentName) {
-        const normalizedExtracted = normalizeComponentName(componentName);
-        matchedComp = dbComponents.find(
-          (c) => normalizeComponentName(c.component_name) === normalizedExtracted
-        );
+      if (parsedData.extractedComponents && parsedData.extractedComponents.length > 0) {
+        const matchResult = matchOrRegisterComponents(parsedData.extractedComponents, dbComponents);
+        resolvedItems = matchResult.processedItems;
+        updatedDb = matchResult.updatedDbComponents;
+        setDbComponents(updatedDb);
+        setExtractedComponents(resolvedItems);
+        
+        // Use the first resolved item
+        componentName = resolvedItems[0].componentName;
+        parsedData.orderedQty = resolvedItems[0].orderedQty;
+        parsedData.rate = resolvedItems[0].rate;
+      } else {
+        setExtractedComponents([]);
+        if (componentName) {
+          const normalizedExtracted = normalizeComponentName(componentName);
+          const matchedComp = dbComponents.find(
+            (c) => normalizeComponentName(c.component_name) === normalizedExtracted
+          );
 
-        if (matchedComp) {
-          console.log("Fuzzy match found existing component:", matchedComp);
-          componentName = matchedComp.component_name;
-        } else {
-          console.log("No fuzzy match found. Creating temporary component option...");
-          const tempComp = {
-            id: `temp-${Date.now()}`,
-            component_name: componentName,
-            status: "Auto Created",
-            isTemp: true,
-          };
-          setDbComponents((prev) => [...prev.filter((c) => !c.isTemp), tempComp]);
-          alert("New component detected and added automatically.");
+          if (matchedComp) {
+            console.log("Fuzzy match found existing component:", matchedComp);
+            componentName = matchedComp.component_name;
+          } else {
+            console.log("No fuzzy match found. Creating temporary component option...");
+            const tempComp = {
+              id: `temp-${Date.now()}`,
+              component_name: componentName,
+              status: "Auto Created",
+              isTemp: true,
+            };
+            setDbComponents((prev) => [...prev.filter((c) => !c.isTemp), tempComp]);
+            alert("New component detected and added automatically.");
+          }
         }
       }
 
@@ -251,22 +383,33 @@ function AddOrder() {
       }
     }
 
-    // 2. Extract Component Name (Fuzzy Match inside handleFileChange)
-    // We scan text for any of our existing components in DB
-    const matchedComponent = dbComponents.find(c => lowerText.includes(c.component_name.toLowerCase()));
-    if (matchedComponent) {
-      component = matchedComponent.component_name;
+    // Prioritize structured table extraction
+    const extractedComponents = extractRKCLTableRows(text);
+    if (extractedComponents.length > 0) {
+      component = extractedComponents[0].componentName;
+      orderedQty = extractedComponents[0].orderedQty;
+      rate = extractedComponents[0].rate;
       confidences.component = 100;
-      if (matchedComponent.rate) {
-        rate = matchedComponent.rate.toString();
-        confidences.rate = 75;
-      }
+      confidences.orderedQty = 100;
+      confidences.rate = 100;
     } else {
-      // Guess based on common component keywords if not found
-      const descMatch = text.match(/(?:material|component|item|description|part)\s*(?::|)?\s*([A-Z0-9\s.-]{6,50})/i);
-      if (descMatch) {
-        component = descMatch[1].trim();
-        confidences.component = 55;
+      // 2. Extract Component Name (Fuzzy Match inside handleFileChange)
+      // We scan text for any of our existing components in DB
+      const matchedComponent = dbComponents.find(c => lowerText.includes(c.component_name.toLowerCase()));
+      if (matchedComponent) {
+        component = matchedComponent.component_name;
+        confidences.component = 100;
+        if (matchedComponent.rate) {
+          rate = matchedComponent.rate.toString();
+          confidences.rate = 75;
+        }
+      } else {
+        // Guess based on common component keywords if not found
+        const descMatch = text.match(/(?:material|component|item|description|part)\s*(?::|)?\s*([A-Z0-9\s.-]{6,50})/i);
+        if (descMatch) {
+          component = descMatch[1].trim();
+          confidences.component = 55;
+        }
       }
     }
 
@@ -388,7 +531,7 @@ function AddOrder() {
       confidences.plant = 100;
     }
 
-    return { poNumber, poDate, company, component, orderedQty, rate, plant, confidences };
+    return { poNumber, poDate, company, component, orderedQty, rate, plant, extractedComponents, confidences };
   }
 
   const handleSubmit = async (e) => {
@@ -623,6 +766,34 @@ function AddOrder() {
             </div>
 
             <form onSubmit={handleSubmit} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+              {extractedComponents.length > 1 && (
+                <div style={{ gridColumn: "1 / -1", marginBottom: "10px" }}>
+                  <FormSelect
+                    label="Extracted PO Items (Multi-item PO) - Select to autofill"
+                    value={formData.component}
+                    onChange={(e) => {
+                      const selectedCompName = e.target.value;
+                      const matched = extractedComponents.find(item => item.componentName === selectedCompName);
+                      if (matched) {
+                        setFormData(prev => ({
+                          ...prev,
+                          component: selectedCompName,
+                          orderedQty: matched.orderedQty,
+                          rate: matched.rate
+                        }));
+                      }
+                    }}
+                    style={{ marginBottom: 0 }}
+                  >
+                    {extractedComponents.map((item, idx) => (
+                      <option key={idx} value={item.componentName}>
+                        {item.componentName} (Qty: {Number(item.orderedQty).toLocaleString()}, Rate: ₹{item.rate})
+                      </option>
+                    ))}
+                  </FormSelect>
+                </div>
+              )}
+
               <FormInput
                 label={
                   <span>
