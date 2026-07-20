@@ -11,6 +11,11 @@ import { FormInput, FormSelect, FormDatePicker, FormButton } from "../components
 import { supabase } from "../supabaseClient";
 import componentsData from "../data/componentsData.json";
 
+function normalizeComponentName(name) {
+  if (!name) return "";
+  return name.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
 function OrderHistory() {
   const { component } = useParams();
   const componentName = decodeURIComponent(component);
@@ -24,19 +29,29 @@ function OrderHistory() {
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
-    const { data: componentData, error: componentError } = await supabase
-      .from("components")
-      .select("id")
-      .eq("component_name", componentName)
-      .single();
 
-    if (componentError || !componentData) {
+    // Fetch all components to match by normalized component name
+    const { data: allComponents, error: componentError } = await supabase
+      .from("components")
+      .select("id, component_name");
+
+    if (componentError || !allComponents) {
       console.log(componentError);
       setIsLoading(false);
       return;
     }
 
-    const componentId = componentData.id;
+    const targetNormalized = normalizeComponentName(componentName);
+    const matchingComponentIds = allComponents
+      .filter((c) => normalizeComponentName(c.component_name) === targetNormalized)
+      .map((c) => c.id);
+
+    if (matchingComponentIds.length === 0) {
+      setOrders([]);
+      setDispatches([]);
+      setIsLoading(false);
+      return;
+    }
 
     const { data: poItems, error: poError } = await supabase
       .from("purchase_order_items")
@@ -54,7 +69,7 @@ function OrderHistory() {
           )
         )
       `)
-      .eq("component_id", componentId);
+      .in("component_id", matchingComponentIds);
 
     if (poError) {
       console.log(poError);
@@ -232,7 +247,6 @@ function OrderHistory() {
 
   const poColumns = [
     { header: "PO Number", render: (item) => item.po_number || "Legacy Order" },
-    { header: "Plant", key: "plant" },
     { header: "Ordered Quantity", render: (item) => Number(item.ordered_qty || 0).toLocaleString() },
     { header: "Pending Quantity", render: (item) => Number(item.pending_qty || 0).toLocaleString() },
     {

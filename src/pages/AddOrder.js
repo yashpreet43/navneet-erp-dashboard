@@ -17,39 +17,109 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 // Component name normalization helper
 function normalizeComponentName(name) {
   if (!name) return "";
-  let norm = name.toUpperCase().trim();
-  norm = norm.replace(/\s+/g, " "); // remove multiple spaces
-  norm = norm.replace(/([.,-])\1+/g, "$1"); // remove duplicate punctuation
-  norm = norm.replace(/(\d+)\s*X\s*(\d+)/g, "$1X$2"); // standardize x/X spacing
-  return norm.trim();
+  return name.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+// Exclude list for component names to prevent header text from being treated as component name
+const excludeHeaders = [
+  "description", "hsn", "hsn/sac", "uom", "order qty", "qty", "rate", "value", 
+  "serial", "sl.no", "sl no", "material", "material description", "item", "total",
+  "grand total", "subtotal", "sub total", "purchasing document", "document date", 
+  "plant", "unit rate", "basic amount", "final value"
+];
+
+const isHeader = (name) => {
+  if (!name) return true;
+  const lower = name.toLowerCase().trim();
+  return excludeHeaders.some(h => lower.includes(h) || h.includes(lower)) || lower.length < 3;
+};
+
+// Clean component name from extra metadata and collapse duplicate names
+function cleanComponentName(name) {
+  if (!name) return "";
+  
+  // 1. Stop at markers
+  const markersRegex = /Delivery Within|Delivery At|Indent No|GST|Basic Amount|Total|CGST|SGST|Freight|Remarks|Terms and Conditions/i;
+  let cleaned = name.split(markersRegex)[0].trim();
+  
+  // 2. Collapse duplicates based on first word repetition
+  const words = cleaned.split(/\s+/).filter(w => w.length > 0);
+  if (words.length > 2) {
+    const firstWord = words[0].toLowerCase();
+    if (firstWord.length >= 3) {
+      const lower = cleaned.toLowerCase();
+      const secondIdx = lower.indexOf(firstWord, words[0].length);
+      if (secondIdx !== -1) {
+        const charBefore = lower[secondIdx - 1];
+        const charAfter = lower[secondIdx + firstWord.length];
+        const isWordBoundaryBefore = !charBefore || /\s/.test(charBefore);
+        const isWordBoundaryAfter = !charAfter || /\s/.test(charAfter);
+        
+        if (isWordBoundaryBefore && isWordBoundaryAfter) {
+          cleaned = cleaned.substring(0, secondIdx).trim();
+        }
+      }
+    }
+  }
+  
+  return cleaned;
 }
 
 // Robust table parser for structured rows (Serial No, Component, UOM, Qty, Rate, Value)
 function extractRKCLTableRows(text) {
+  const extractedItems = [];
   const lines = text.split("\n").map(l => l.trim()).filter(l => l.length > 0);
-  const items = [];
+  const tokens = text.split(/\s+/).filter(t => t.length > 0);
   
-  // Exclude list for component names to prevent header text from being treated as component name
-  const excludeHeaders = [
-    "description", "hsn", "hsn/sac", "uom", "order qty", "qty", "rate", "value", 
-    "serial", "sl.no", "sl no", "material", "material description", "item", "total",
-    "grand total", "subtotal", "sub total", "purchasing document", "document date", "plant"
-  ];
-  
-  const isHeader = (name) => {
-    if (!name) return true;
-    const lower = name.toLowerCase().trim();
-    return excludeHeaders.some(h => lower.includes(h) || h.includes(lower)) || lower.length < 3;
-  };
+  let lastMatchEndIndex = -1;
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i];
+    if (/^(EA|NOS|PCS)$/i.test(token)) {
+      if (i + 3 < tokens.length) {
+        const qtyStr = tokens[i+1];
+        const rateStr = tokens[i+2];
+        const valStr = tokens[i+3];
+        
+        const isQty = /^[\d,]+(?:\.\d+)?$/.test(qtyStr);
+        const isRate = /^[\d,]+(?:\.\d+)?$/.test(rateStr);
+        const isVal = /^[\d,]+(?:\.\d+)?$/.test(valStr);
+        
+        if (isQty && isRate && isVal) {
+          let componentStartIdx = lastMatchEndIndex + 1;
+          
+          for (let j = i - 1; j > lastMatchEndIndex; j--) {
+            if (/^\d{1,3}$/.test(tokens[j])) {
+              componentStartIdx = j + 1;
+              break;
+            }
+          }
+          
+          if (componentStartIdx < i) {
+            const componentName = cleanComponentName(tokens.slice(componentStartIdx, i).join(" "));
+            if (!isHeader(componentName)) {
+              extractedItems.push({
+                componentName: componentName.trim(),
+                orderedQty: Math.round(parseFloat(qtyStr.replace(/,/g, ""))).toString(),
+                rate: parseFloat(rateStr.replace(/,/g, "")).toString(),
+                amount: parseFloat(valStr.replace(/,/g, "")).toString()
+              });
+              lastMatchEndIndex = i + 3;
+            }
+          }
+        }
+      }
+    }
+  }
 
-  // 1. Try single line regex match
-  for (let line of lines) {
-    const match = line.match(/^(\d+)\s+(.+?)\s+(EA|NOS|PCS)\s+([\d,]+(?:\.\d+)?)\s+([\d,]+(?:\.\d+)?)\s+([\d,]+(?:\.\d+)?)$/i);
-    if (match) {
-      const componentName = match[2].trim();
-      if (!isHeader(componentName)) {
-        items.push({
-          componentName,
+  // Fallback: If no items found by token scanning, use the global regex (without newlines in component name)
+  if (extractedItems.length === 0) {
+    const globalRegex = /\b(\d{1,3})\s+([A-Z0-9 \t./()#*+-]{3,70}?)\s+\b(EA|NOS|PCS)\b\s+([\d,]+(?:\.\d+)?)\s+([\d,]+(?:\.\d+)?)\s+([\d,]+(?:\.\d+)?)\b/gi;
+    let match;
+    while ((match = globalRegex.exec(text)) !== null) {
+      const name = cleanComponentName(match[2]);
+      if (!isHeader(name)) {
+        extractedItems.push({
+          componentName: name,
           orderedQty: Math.round(parseFloat(match[4].replace(/,/g, ""))).toString(),
           rate: parseFloat(match[5].replace(/,/g, "")).toString(),
           amount: parseFloat(match[6].replace(/,/g, "")).toString()
@@ -58,57 +128,18 @@ function extractRKCLTableRows(text) {
     }
   }
 
-  // 2. Try multi-line parsing with name and UOM on the same line
-  if (items.length === 0) {
-    for (let k = 0; k < lines.length - 4; k++) {
-      const isSerial = /^\d+$/.test(lines[k]);
-      const nameAndUom = lines[k+1];
-      const isQty = /^[\d,]+(?:\.\d+)?$/.test(lines[k+2]);
-      const isRate = /^[\d,]+(?:\.\d+)?$/.test(lines[k+3]);
-      const isVal = /^[\d,]+(?:\.\d+)?$/.test(lines[k+4]);
-      
-      if (isSerial && isQty && isRate && isVal) {
-        const uomMatch = nameAndUom.match(/(.+?)\s+(EA|NOS|PCS)$/i);
-        if (uomMatch) {
-          const name = uomMatch[1].trim();
-          if (!isHeader(name)) {
-            items.push({
-              componentName: name,
-              orderedQty: Math.round(parseFloat(lines[k+2].replace(/,/g, ""))).toString(),
-              rate: parseFloat(lines[k+3].replace(/,/g, "")).toString(),
-              amount: parseFloat(lines[k+4].replace(/,/g, "")).toString()
-            });
-            k += 4;
-          }
-        }
-      }
-    }
-  }
+  const matches = extractedItems.map(item => item.componentName);
+  console.log("ALL OCR LINES:", lines);
+  console.log("COMPONENT MATCHES:", matches);
+  console.log("FINAL ITEMS:", extractedItems);
 
-  // 3. Try standard multi-line parsing (UOM is a standalone line)
-  if (items.length === 0) {
-    for (let k = 0; k < lines.length - 5; k++) {
-      const isSerial = /^\d+$/.test(lines[k]);
-      const name = lines[k+1];
-      const isUOM = /^(EA|NOS|PCS)$/i.test(lines[k+2]);
-      const isQty = /^[\d,]+(?:\.\d+)?$/.test(lines[k+3]);
-      const isRate = /^[\d,]+(?:\.\d+)?$/.test(lines[k+4]);
-      const isVal = /^[\d,]+(?:\.\d+)?$/.test(lines[k+5]);
-      
-      if (isSerial && isUOM && isQty && isRate && isVal && !isHeader(name)) {
-        items.push({
-          componentName: name,
-          orderedQty: Math.round(parseFloat(lines[k+3].replace(/,/g, ""))).toString(),
-          rate: parseFloat(lines[k+4].replace(/,/g, "")).toString(),
-          amount: parseFloat(lines[k+5].replace(/,/g, "")).toString()
-        });
-        k += 5;
-      }
-    }
-  }
+  console.log("Detected PO line items:", extractedItems);
+  console.log("Total extracted items:", extractedItems.length);
 
-  return items;
+  return extractedItems;
 }
+
+
 
 const matchOrRegisterComponents = (items, currentDbComponents) => {
   let updatedDbComponents = [...currentDbComponents];
@@ -299,6 +330,14 @@ function AddOrder() {
         }
       }
 
+      const candidates = parsedData.extractedComponents && parsedData.extractedComponents.length > 0
+        ? parsedData.extractedComponents.map(c => c.componentName)
+        : (componentName && componentName !== "No component identified" ? [componentName] : []);
+
+      console.log("RAW PDF TEXT:", extractedText);
+      console.log("COMPONENT CANDIDATES:", candidates);
+      console.log("SELECTED COMPONENT:", componentName);
+
       // Prefill form values
       setFormData({
         poNumber: parsedData.poNumber || formData.poNumber,
@@ -407,10 +446,18 @@ function AddOrder() {
         // Guess based on common component keywords if not found
         const descMatch = text.match(/(?:material|component|item|description|part)\s*(?::|)?\s*([A-Z0-9\s.-]{6,50})/i);
         if (descMatch) {
-          component = descMatch[1].trim();
-          confidences.component = 55;
+          const guessedName = cleanComponentName(descMatch[1]);
+          if (!isHeader(guessedName)) {
+            component = guessedName;
+            confidences.component = 55;
+          }
         }
       }
+    }
+
+    if (!component || isHeader(component)) {
+      component = "No component identified";
+      confidences.component = 0;
     }
 
     // 3. Extract PO Number
@@ -534,8 +581,71 @@ function AddOrder() {
     return { poNumber, poDate, company, component, orderedQty, rate, plant, extractedComponents, confidences };
   }
 
+  const resolveOrCreateComponentId = async (compName, rate, companyName, poNumber) => {
+    let matchedComp = dbComponents.find(
+      (c) => normalizeComponentName(c.component_name) === normalizeComponentName(compName)
+    );
+
+    if (matchedComp && !matchedComp.id.toString().startsWith("temp")) {
+      return matchedComp.id;
+    }
+
+    // Auto-create component
+    const insertObj = {
+      component_name: compName,
+      rate: rate ? Number(rate) : null,
+      status: "Auto Created",
+      created_source: "PO OCR",
+      discovered_at: new Date().toISOString(),
+      first_customer: companyName,
+      first_po_number: poNumber
+    };
+
+    const { data: newComp, error: compErr } = await supabase
+      .from("components")
+      .insert([insertObj])
+      .select()
+      .single();
+
+    if (compErr) {
+      console.warn("Full metadata component insert failed, falling back to basic columns:", compErr.message);
+      const fallbackObj = {
+        component_name: compName,
+        rate: rate ? Number(rate) : null
+      };
+
+      const { data: fallbackComp, error: fallbackErr } = await supabase
+        .from("components")
+        .insert([fallbackObj])
+        .select()
+        .single();
+
+      if (fallbackErr) {
+        console.error("Component creation failed completely:", fallbackErr);
+        throw new Error("Error auto-creating component: " + fallbackErr.message);
+      }
+      return fallbackComp.id;
+    }
+    return newComp.id;
+  };
+
+  const handlePreviewChange = (index, field, value) => {
+    setExtractedComponents((prev) => {
+      const copy = [...prev];
+      copy[index] = { ...copy[index], [field]: value };
+      return copy;
+    });
+  };
+
+  const handlePreviewDelete = (index) => {
+    setExtractedComponents((prev) => prev.filter((_, idx) => idx !== index));
+  };
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsUploading(true);
+    setUploadStatus("Saving order data to database...");
 
     try {
       const { data: company } = await supabase
@@ -546,140 +656,161 @@ function AddOrder() {
 
       if (!company) {
         alert("Company not found");
+        setIsUploading(false);
+        setUploadStatus("");
         return;
       }
 
-      // 1. Fuzzy match or auto-create component
-      let componentId = null;
-      let matchedComp = dbComponents.find(
-        (c) => normalizeComponentName(c.component_name) === normalizeComponentName(formData.component)
-      );
+      // Check if we are submitting multiple extracted components
+      if (extractedComponents.length > 0) {
+        console.log("Saving multiple PO items in batch:", extractedComponents);
+        
+        // Filter out invalid items
+        const validItems = extractedComponents.filter(
+          (item) => item.componentName && item.componentName !== "No component identified"
+        );
 
-      if (matchedComp && !matchedComp.isTemp) {
-        componentId = matchedComp.id;
-        console.log("Using existing component:", matchedComp);
+        if (validItems.length === 0) {
+          alert("No valid components to save.");
+          setIsUploading(false);
+          setUploadStatus("");
+          return;
+        }
+
+        // 1. Prepare and insert purchase_orders rows in one operation
+        const poRows = validItems.map(() => ({
+          po_number: formData.poNumber,
+          company_id: company.id,
+          po_date: formData.poDate,
+          plant: formData.plant
+        }));
+
+        const { data: insertedPOs, error: poError } = await supabase
+          .from("purchase_orders")
+          .insert(poRows)
+          .select();
+
+        if (poError) {
+          console.error("Error creating POs in batch:", poError);
+          throw new Error("Error creating POs in batch: " + poError.message);
+        }
+
+        if (!insertedPOs || insertedPOs.length !== validItems.length) {
+          throw new Error("Batch PO insertion mismatch or empty result.");
+        }
+
+        // 2. Resolve component IDs and construct purchase_order_items rows
+        const itemRows = [];
+        for (let i = 0; i < validItems.length; i++) {
+          const item = validItems[i];
+          const componentId = await resolveOrCreateComponentId(
+            item.componentName,
+            item.rate,
+            formData.company,
+            formData.poNumber
+          );
+
+          itemRows.push({
+            purchase_order_id: insertedPOs[i].id,
+            component_id: componentId,
+            ordered_qty: Number(item.orderedQty),
+            rate: Number(item.rate)
+          });
+        }
+
+        // 3. Batch insert purchase_order_items rows in one operation
+        const { error: itemsError } = await supabase
+          .from("purchase_order_items")
+          .insert(itemRows);
+
+        if (itemsError) {
+          console.error("Error creating PO Items in batch:", itemsError);
+          throw new Error("Error creating PO Items in batch: " + itemsError.message);
+        }
+
+        // 4. Optionally insert doc urls linked to each inserted PO
+        if (uploadedDocUrl) {
+          const docRows = insertedPOs.map((po) => ({
+            purchase_order_id: po.id,
+            file_name: uploadedDocName,
+            file_url: uploadedDocUrl
+          }));
+          try {
+            await supabase.from("po_documents").insert(docRows);
+          } catch (err) {
+            console.warn("po_documents batch insert bypassed:", err);
+          }
+        }
       } else {
-        console.log("Component needs auto-creation:", formData.component);
-        // Attempt insert with full metadata schema
-        const insertObj = {
-          component_name: formData.component,
-          rate: formData.rate ? Number(formData.rate) : null,
-          status: "Auto Created",
-          created_source: "PO OCR",
-          discovered_at: new Date().toISOString(),
-          first_customer: formData.company,
-          first_po_number: formData.poNumber
-        };
+        // Fallback: single item manual submission
+        if (!formData.component || formData.component === "No component identified") {
+          alert("Please select or enter a valid component");
+          setIsUploading(false);
+          setUploadStatus("");
+          return;
+        }
 
-        const { data: newComp, error: compErr } = await supabase
-          .from("components")
-          .insert([insertObj])
+        // 1. Resolve or create component
+        const componentId = await resolveOrCreateComponentId(
+          formData.component,
+          formData.rate,
+          formData.company,
+          formData.poNumber
+        );
+
+        // 2. Insert PO
+        const { data: purchaseOrder, error: poError } = await supabase
+          .from("purchase_orders")
+          .insert([
+            {
+              po_number: formData.poNumber,
+              company_id: company.id,
+              po_date: formData.poDate,
+              plant: formData.plant
+            }
+          ])
           .select()
           .single();
 
-        if (compErr) {
-          console.warn("Full metadata component insert failed, falling back to basic columns:", compErr.message);
-          // Fallback schema (only columns verified by DB live checks)
-          const fallbackObj = {
-            component_name: formData.component,
-            rate: formData.rate ? Number(formData.rate) : null
-          };
-
-          const { data: fallbackComp, error: fallbackErr } = await supabase
-            .from("components")
-            .insert([fallbackObj])
-            .select()
-            .single();
-
-          if (fallbackErr) {
-            console.error("Component creation failed completely:", fallbackErr);
-            alert("Error auto-creating component: " + fallbackErr.message);
-            return;
-          }
-          componentId = fallbackComp.id;
-          console.log("Component created successfully with basic schema:", fallbackComp);
-        } else {
-          componentId = newComp.id;
-          console.log("Component created successfully with metadata schema:", newComp);
+        if (poError) {
+          throw new Error("Error creating PO: " + poError.message);
         }
 
-        // Add newly created component to dbComponents state
-        const refreshedComp = {
-          id: componentId,
-          component_name: formData.component,
-          status: "Auto Created"
-        };
-        setDbComponents((prev) => [...prev.filter((c) => c.component_name !== formData.component), refreshedComp]);
-        alert("New component detected and added automatically.");
-      }
+        // 3. Insert PO Item
+        const { error: itemError } = await supabase
+          .from("purchase_order_items")
+          .insert([
+            {
+              purchase_order_id: purchaseOrder.id,
+              component_id: componentId,
+              ordered_qty: Number(formData.orderedQty),
+              rate: Number(formData.rate)
+            }
+          ]);
 
-      // Save PO and fix bug where plant was not stored
-      const { data: purchaseOrder, error: poError } = await supabase
-        .from("purchase_orders")
-        .insert([
-          {
-            po_number: formData.poNumber,
-            company_id: company.id,
-            po_date: formData.poDate,
-            plant: formData.plant
-          }
-        ])
-        .select()
-        .single();
+        if (itemError) {
+          throw new Error("Error creating PO Item: " + itemError.message);
+        }
 
-      if (poError) {
-        console.log(poError);
-        alert("Error creating PO");
-        return;
-      }
-
-      const { error: itemError } = await supabase
-        .from("purchase_order_items")
-        .insert([
-          {
-            purchase_order_id: purchaseOrder.id,
-            component_id: componentId,
-            ordered_qty: Number(formData.orderedQty),
-            rate: Number(formData.rate)
-          }
-        ]);
-
-      if (itemError) {
-        console.log(itemError);
-        alert("Error creating PO Item");
-        return;
-      }
-
-      console.log("Successfully inserted Purchase Order:", purchaseOrder);
-      console.log("Successfully inserted Purchase Order Item:", {
-        purchase_order_id: purchaseOrder.id,
-        component_id: componentId,
-        ordered_qty: Number(formData.orderedQty),
-        rate: Number(formData.rate)
-      });
-
-      // Save metadata to po_documents (table might be missing, catch error gracefully)
-      if (purchaseOrder && uploadedDocUrl) {
-        try {
-          const { error: docError } = await supabase
-            .from("po_documents")
-            .insert([
+        // 4. Save doc url
+        if (purchaseOrder && uploadedDocUrl) {
+          try {
+            await supabase.from("po_documents").insert([
               {
                 purchase_order_id: purchaseOrder.id,
                 file_name: uploadedDocName,
                 file_url: uploadedDocUrl
               }
             ]);
-
-          if (docError) {
-            console.warn("po_documents save bypassed:", docError.message);
+          } catch (err) {
+            console.warn("po_documents insert bypassed:", err);
           }
-        } catch (docErr) {
-          console.warn("po_documents exception:", docErr);
         }
       }
 
-      alert("Purchase Order Saved Successfully");
+      setIsUploading(false);
+      setUploadStatus("");
+      alert("All purchase orders saved successfully!");
       
       setFormData({
         poNumber: "",
@@ -691,6 +822,7 @@ function AddOrder() {
         poDate: "",
       });
 
+      setExtractedComponents([]);
       setUploadedDocName("");
       setUploadedDocUrl("");
       setConfidence({
@@ -704,8 +836,10 @@ function AddOrder() {
       });
 
     } catch (err) {
-      console.log(err);
-      alert("Unexpected Error");
+      console.error("Submission failed:", err);
+      alert(err.message || "Error submitting purchase orders");
+      setIsUploading(false);
+      setUploadStatus("");
     }
   };
 
@@ -748,9 +882,38 @@ function AddOrder() {
                   {isUploading ? "Extracting..." : "Upload PO"}
                 </label>
                 {uploadedDocName && (
-                  <span style={{ fontSize: "14px", color: "#4ade80" }}>
-                    📎 {uploadedDocName}
-                  </span>
+                  <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                    <span style={{ fontSize: "14px", color: "#4ade80" }}>
+                      📎 {uploadedDocName}
+                    </span>
+                    {extractedComponents.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setExtractedComponents([]);
+                          setFormData(prev => ({
+                            ...prev,
+                            component: "",
+                            orderedQty: "",
+                            rate: ""
+                          }));
+                          setUploadedDocName("");
+                          setUploadedDocUrl("");
+                        }}
+                        style={{
+                          background: "rgba(255,255,255,0.05)",
+                          border: "1px solid rgba(255,255,255,0.1)",
+                          color: "#cbd5e1",
+                          padding: "4px 10px",
+                          borderRadius: "6px",
+                          cursor: "pointer",
+                          fontSize: "12px"
+                        }}
+                      >
+                        Clear Extracted Items
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
               {isUploading && (
@@ -766,34 +929,6 @@ function AddOrder() {
             </div>
 
             <form onSubmit={handleSubmit} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
-              {extractedComponents.length > 1 && (
-                <div style={{ gridColumn: "1 / -1", marginBottom: "10px" }}>
-                  <FormSelect
-                    label="Extracted PO Items (Multi-item PO) - Select to autofill"
-                    value={formData.component}
-                    onChange={(e) => {
-                      const selectedCompName = e.target.value;
-                      const matched = extractedComponents.find(item => item.componentName === selectedCompName);
-                      if (matched) {
-                        setFormData(prev => ({
-                          ...prev,
-                          component: selectedCompName,
-                          orderedQty: matched.orderedQty,
-                          rate: matched.rate
-                        }));
-                      }
-                    }}
-                    style={{ marginBottom: 0 }}
-                  >
-                    {extractedComponents.map((item, idx) => (
-                      <option key={idx} value={item.componentName}>
-                        {item.componentName} (Qty: {Number(item.orderedQty).toLocaleString()}, Rate: ₹{item.rate})
-                      </option>
-                    ))}
-                  </FormSelect>
-                </div>
-              )}
-
               <FormInput
                 label={
                   <span>
@@ -838,49 +973,6 @@ function AddOrder() {
               <FormSelect
                 label={
                   <span>
-                    Component
-                    {formData.component && confidence.component > 0 && (
-                      <span style={{ fontSize: "11px", marginLeft: "8px", color: confidence.component >= 80 ? "#4ade80" : "#fbbf24" }}>
-                        ({confidence.component}% match)
-                      </span>
-                    )}
-                    {(() => {
-                      const selected = dbComponents.find(c => c.component_name === formData.component);
-                      if (selected && (selected.status === "Auto Created" || selected.isTemp)) {
-                        return (
-                          <span style={{
-                            background: "linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%)",
-                            color: "#ffffff",
-                            fontSize: "10px",
-                            padding: "2px 6px",
-                            borderRadius: "6px",
-                            marginLeft: "10px",
-                            fontWeight: "bold"
-                          }}>
-                            AI Discovered
-                          </span>
-                        );
-                      }
-                      return null;
-                    })()}
-                  </span>
-                }
-                name="component"
-                value={formData.component}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select Component</option>
-                {dbComponents.map((item) => (
-                  <option key={item.id} value={item.component_name}>
-                    {item.component_name} {item.status === "Auto Created" || item.isTemp ? "[AI Discovered]" : ""}
-                  </option>
-                ))}
-              </FormSelect>
-
-              <FormSelect
-                label={
-                  <span>
                     Plant
                     {formData.plant && confidence.plant > 0 && (
                       <span style={{ fontSize: "11px", marginLeft: "8px", color: confidence.plant >= 80 ? "#4ade80" : "#fbbf24" }}>
@@ -902,65 +994,206 @@ function AddOrder() {
                 <option value="7">Plant 7</option>
               </FormSelect>
 
-              <FormInput
+              <FormDatePicker
                 label={
                   <span>
-                    Ordered Quantity
-                    {formData.orderedQty && confidence.orderedQty > 0 && (
-                      <span style={{ fontSize: "11px", marginLeft: "8px", color: confidence.orderedQty >= 80 ? "#4ade80" : "#fbbf24" }}>
-                        ({confidence.orderedQty}% match)
+                    PO Date
+                    {formData.poDate && confidence.poDate > 0 && (
+                      <span style={{ fontSize: "11px", marginLeft: "8px", color: confidence.poDate >= 80 ? "#4ade80" : "#fbbf24" }}>
+                        ({confidence.poDate}% match)
                       </span>
                     )}
                   </span>
                 }
-                type="number"
-                name="orderedQty"
-                value={formData.orderedQty}
+                name="poDate"
+                value={formData.poDate}
                 onChange={handleChange}
                 required
               />
 
-              <FormInput
-                label={
-                  <span>
-                    Rate
-                    {formData.rate && confidence.rate > 0 && (
-                      <span style={{ fontSize: "11px", marginLeft: "8px", color: confidence.rate >= 80 ? "#4ade80" : "#fbbf24" }}>
-                        ({confidence.rate}% match)
+              {extractedComponents.length === 0 && (
+                <>
+                  <FormSelect
+                    label={
+                      <span>
+                        Component
+                        {formData.component && confidence.component > 0 && (
+                          <span style={{ fontSize: "11px", marginLeft: "8px", color: confidence.component >= 80 ? "#4ade80" : "#fbbf24" }}>
+                            ({confidence.component}% match)
+                          </span>
+                        )}
+                        {(() => {
+                          const selected = dbComponents.find(c => c.component_name === formData.component);
+                          if (selected && (selected.status === "Auto Created" || selected.isTemp)) {
+                            return (
+                              <span style={{
+                                background: "linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%)",
+                                color: "#ffffff",
+                                fontSize: "10px",
+                                padding: "2px 6px",
+                                borderRadius: "6px",
+                                marginLeft: "10px",
+                                fontWeight: "bold"
+                              }}>
+                                AI Discovered
+                              </span>
+                            );
+                          }
+                          return null;
+                        })()}
                       </span>
-                    )}
-                  </span>
-                }
-                type="number"
-                step="0.01"
-                name="rate"
-                value={formData.rate}
-                onChange={handleChange}
-                required
-              />
+                    }
+                    name="component"
+                    value={formData.component}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Select Component</option>
+                    {dbComponents.map((item) => (
+                      <option key={item.id} value={item.component_name}>
+                        {item.component_name} {item.status === "Auto Created" || item.isTemp ? "[AI Discovered]" : ""}
+                      </option>
+                    ))}
+                  </FormSelect>
 
-              <div style={{ gridColumn: "span 2" }}>
-                <FormDatePicker
-                  label={
-                    <span>
-                      PO Date
-                      {formData.poDate && confidence.poDate > 0 && (
-                        <span style={{ fontSize: "11px", marginLeft: "8px", color: confidence.poDate >= 80 ? "#4ade80" : "#fbbf24" }}>
-                          ({confidence.poDate}% match)
-                        </span>
-                      )}
-                    </span>
-                  }
-                  name="poDate"
-                  value={formData.poDate}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+                  <FormInput
+                    label={
+                      <span>
+                        Ordered Quantity
+                        {formData.orderedQty && confidence.orderedQty > 0 && (
+                          <span style={{ fontSize: "11px", marginLeft: "8px", color: confidence.orderedQty >= 80 ? "#4ade80" : "#fbbf24" }}>
+                            ({confidence.orderedQty}% match)
+                          </span>
+                        )}
+                      </span>
+                    }
+                    type="number"
+                    name="orderedQty"
+                    value={formData.orderedQty}
+                    onChange={handleChange}
+                    required
+                  />
+
+                  <FormInput
+                    label={
+                      <span>
+                        Rate
+                        {formData.rate && confidence.rate > 0 && (
+                          <span style={{ fontSize: "11px", marginLeft: "8px", color: confidence.rate >= 80 ? "#4ade80" : "#fbbf24" }}>
+                            ({confidence.rate}% match)
+                          </span>
+                        )}
+                      </span>
+                    }
+                    type="number"
+                    step="0.01"
+                    name="rate"
+                    value={formData.rate}
+                    onChange={handleChange}
+                    required
+                  />
+                </>
+              )}
+
+              {extractedComponents.length > 0 && (
+                <div style={{ gridColumn: "span 2", marginTop: "20px" }}>
+                  <h3 style={{ fontSize: "16px", color: "#60a5fa", marginBottom: "15px", fontWeight: 600 }}>
+                    PO Line Items Preview ({extractedComponents.length} items)
+                  </h3>
+                  <div style={{ overflowX: "auto", background: "rgba(255, 255, 255, 0.02)", borderRadius: "8px", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", color: "#e2e8f0" }}>
+                      <thead>
+                        <tr style={{ background: "rgba(255, 255, 255, 0.04)", borderBottom: "1px solid rgba(255, 255, 255, 0.08)" }}>
+                          <th style={{ padding: "12px 16px", textAlign: "left", fontSize: "13px", fontWeight: 600 }}>Component Name</th>
+                          <th style={{ padding: "12px 16px", textAlign: "left", fontSize: "13px", fontWeight: 600, width: "130px" }}>Qty</th>
+                          <th style={{ padding: "12px 16px", textAlign: "left", fontSize: "13px", fontWeight: 600, width: "120px" }}>Rate (₹)</th>
+                          <th style={{ padding: "12px 16px", textAlign: "center", fontSize: "13px", fontWeight: 600, width: "80px" }}>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {extractedComponents.map((item, idx) => (
+                          <tr key={idx} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)", background: idx % 2 === 0 ? "transparent" : "rgba(255,255,255,0.01)" }}>
+                            <td style={{ padding: "10px 16px" }}>
+                              <input
+                                type="text"
+                                value={item.componentName}
+                                onChange={(e) => handlePreviewChange(idx, "componentName", e.target.value)}
+                                style={{
+                                  background: "rgba(255, 255, 255, 0.05)",
+                                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                                  borderRadius: "6px",
+                                  padding: "6px 10px",
+                                  color: "#ffffff",
+                                  fontSize: "13px",
+                                  width: "100%",
+                                  outline: "none"
+                                }}
+                              />
+                            </td>
+                            <td style={{ padding: "10px 16px" }}>
+                              <input
+                                type="number"
+                                value={item.orderedQty}
+                                onChange={(e) => handlePreviewChange(idx, "orderedQty", e.target.value)}
+                                style={{
+                                  background: "rgba(255, 255, 255, 0.05)",
+                                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                                  borderRadius: "6px",
+                                  padding: "6px 10px",
+                                  color: "#ffffff",
+                                  fontSize: "13px",
+                                  width: "100%",
+                                  outline: "none"
+                                }}
+                              />
+                            </td>
+                            <td style={{ padding: "10px 16px" }}>
+                              <input
+                                type="number"
+                                step="0.01"
+                                value={item.rate}
+                                onChange={(e) => handlePreviewChange(idx, "rate", e.target.value)}
+                                style={{
+                                  background: "rgba(255, 255, 255, 0.05)",
+                                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                                  borderRadius: "6px",
+                                  padding: "6px 10px",
+                                  color: "#ffffff",
+                                  fontSize: "13px",
+                                  width: "100%",
+                                  outline: "none"
+                                }}
+                              />
+                            </td>
+                            <td style={{ padding: "10px 16px", textAlign: "center" }}>
+                              <button
+                                type="button"
+                                onClick={() => handlePreviewDelete(idx)}
+                                style={{
+                                  background: "rgba(239, 68, 68, 0.15)",
+                                  border: "1px solid rgba(239, 68, 68, 0.3)",
+                                  color: "#f87171",
+                                  padding: "5px 10px",
+                                  borderRadius: "6px",
+                                  cursor: "pointer",
+                                  fontSize: "12px",
+                                  outline: "none"
+                                }}
+                              >
+                                Delete
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
 
               <div style={{ gridColumn: "span 2", display: "flex", justifyContent: "flex-end", marginTop: "10px" }}>
                 <FormButton type="submit" variant="primary" style={{ width: "100%" }}>
-                  Save Purchase Order
+                  {extractedComponents.length > 0 ? "Save All PO Line Items" : "Save Purchase Order"}
                 </FormButton>
               </div>
             </form>

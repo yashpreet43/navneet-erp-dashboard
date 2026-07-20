@@ -1,50 +1,85 @@
-import { NavLink } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 
 function Sidebar() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
+
+  // Close mobile drawer on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location]);
+
+  // Close mobile drawer on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setMobileOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const navItems = [
+    { to: "/", label: "Dashboard", icon: "📊" },
+    { to: "/plastic-components", label: "Components", icon: "🧩" },
+    { to: "/pending-orders", label: "Pending Orders", icon: "⏳" },
+    { to: "/add-order", label: "Add Order", icon: "➕" },
+    { to: "/expenses", label: "Expenses", icon: "💸" },
+    { to: "/add-expense", label: "Add Expense", icon: "💳" },
+    { to: "/employees", label: "Employees", icon: "👥" },
+    { to: "/vendors", label: "Vendors", icon: "🏬" },
+  ];
+
   return (
-    <div className="sidebar">
+    <>
+      {/* Mobile Top Navigation Header */}
+      <header className="mobile-header">
+        <button
+          className="hamburger-btn"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label="Toggle navigation menu"
+        >
+          <span className="hamburger-bar"></span>
+          <span className="hamburger-bar"></span>
+          <span className="hamburger-bar"></span>
+        </button>
+        <div className="mobile-logo">
+          <span>🏭</span> Navneet
+        </div>
+      </header>
 
-      <h2 className="sidebar-logo">
-        🏭 Navneet
-      </h2>
+      {/* Semi-transparent Backdrop for Mobile Drawer */}
+      {mobileOpen && (
+        <div
+          className="sidebar-backdrop"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
 
-      <div className="sidebar-links">
+      {/* Responsive Sidebar */}
+      <aside className={`sidebar ${mobileOpen ? "mobile-open" : ""}`}>
+        <div className="sidebar-logo">
+          <span className="logo-icon">🏭</span>
+          <span className="logo-text">Navneet</span>
+        </div>
 
-        <NavLink to="/">
-          Dashboard
-        </NavLink>
-
-        <NavLink to="/plastic-components">
-          Components
-        </NavLink>
-
-        <NavLink to="/pending-orders">
-          Pending Orders
-        </NavLink>
-
-        <NavLink to="/add-order">
-          Add Order
-        </NavLink>
-
-        <NavLink to="/expenses">
-    Expenses
-</NavLink>
-
-<NavLink to="/add-expense">
-    Add Expense
-</NavLink>
-
-<NavLink to="/employees">
-    Employees
-</NavLink>
-
-<NavLink to="/vendors">
-    Vendors
-</NavLink>
-
-      </div>
-
-    </div>
+        <nav className="sidebar-links">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              data-tooltip={item.label}
+              onClick={() => setMobileOpen(false)}
+            >
+              <span className="link-icon">{item.icon}</span>
+              <span className="link-label">{item.label}</span>
+            </NavLink>
+          ))}
+        </nav>
+      </aside>
+    </>
   );
 }
 

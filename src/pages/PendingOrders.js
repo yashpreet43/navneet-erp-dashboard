@@ -134,7 +134,7 @@ function PendingOrders() {
   });
 
   const columns = [
-    { header: "PO Number", key: "po_number" },
+    { header: "Component Name", key: "component" },
     {
       header: "Plant",
       render: (item) => `Plant ${String(item.plant || "").replace(/plant/i, "").trim()}`
@@ -155,7 +155,6 @@ function PendingOrders() {
       header: "Status",
       render: (item) => <StatusBadge status={item.status} />
     },
-    { header: "Order Date", key: "po_date" },
     {
       header: "Action",
       render: (item) => (
@@ -164,7 +163,7 @@ function PendingOrders() {
           onClick={() => navigate(`/history/${encodeURIComponent(item.component)}`)}
           style={{ padding: "6px 12.5px", fontSize: "12.5px" }}
         >
-          View History
+          Dispatch
         </FormButton>
       )
     }
